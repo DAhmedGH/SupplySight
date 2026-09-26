@@ -1,0 +1,75 @@
+version: 2
+
+models:
+  - name: sales_order_line
+    description: >-
+      One row per eligible CORE order line. Revenue, COGS, and gross profit are
+      recognized only for delivered status; booked_order_amount includes every
+      eligible status. COGS uses the selected product version's observed unit_cost. Returns and refunds
+      are separately aggregated as linked-return context by order line and are not subtracted from revenue
+      or gross profit. This context does not represent all returns: return_monthly
+      includes eligible CORE returns regardless of order eligibility. CORE WARNING rows remain included. Product history fallback
+      is exposed because earlier events use the earliest warehouse-observed version.
+    columns:
+      - {name: order_fact_key, description: CORE fact key., tests: [not_null, unique]}
+      - {name: order_line_id, description: Source order-line grain and trace key., tests: [not_null, unique]}
+      - {name: order_date_key, description: CORE date dimension key., tests: [not_null, {relationships: {arguments: {to: ref('dim_date'), field: date_key}}}]}
+      - {name: customer_key, description: CORE customer key., tests: [not_null, {relationships: {arguments: {to: ref('dim_customer'), field: customer_key}}}]}
+      - {name: product_key, description: Selected SCD product version key., tests: [not_null, {relationships: {arguments: {to: ref('dim_product'), field: product_key}}}]}
+      - {name: warehouse_key, description: CORE warehouse key., tests: [not_null, {relationships: {arguments: {to: ref('dim_warehouse'), field: warehouse_key}}}]}
+      - {name: order_status, description: CORE normalized order status., tests: [{accepted_values: {arguments: {values: [delivered, processing, backordered, partially_fulfilled, cancelled]}}}]}
+      - {name: booked_order_amount, description: Additive CORE net order amount across every eligible order status., tests: [not_null]}
+      - {name: is_revenue_recognized, description: True only for delivered order lines., tests: [not_null]}
+      - {name: revenue_amount, description: Additive recognized revenue; CORE net_order_amount only for delivered status, otherwise zero., tests: [not_null]}
+      - {name: cost_of_goods_sold, description: Additive recognized COGS; quantity times selected product version unit_cost for delivered status only., tests: [not_null]}
+      - {name: gross_profit_amount, description: Recognized revenue less recognized COGS; zero for non-delivered status., tests: [not_null]}
+      - {name: gross_margin_rate, description: Delivered-line gross profit divided by delivered-line revenue; null for non-delivered or zero revenue. Recalculate from sums when aggregating.}
+      - {name: linked_return_count, description: Count of eligible CORE return rows tied to this eligible order line; linked context only.}
+      - {name: linked_refund_amount, description: Separate additive CORE refund amount for this eligible order line; not netted from revenue.}
+      - {name: product_history_fallback, description: CORE fallback flag where event predates first observed product version., tests: [not_null]}
+      - {name: quality_status, description: CORE order quality state; CLEAN and WARNING are included., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING]}}}]}
+  - name: sales_monthly
+    description: >-
+      Monthly sales aggregate at order_month, customer_key, product_key, and
+      warehouse_key. Additive amounts and counts are supplied for downstream
+      reporting; gross_margin_rate is a ratio of aggregated gross profit to revenue.
+    tests:
+      - unique_combination_of_columns: {arguments: {combination_of_columns: [order_month, customer_key, product_key, warehouse_key]}}
+    columns:
+      - {name: order_month, description: First calendar day of order month., tests: [not_null]}
+      - {name: customer_key, description: CORE customer key., tests: [not_null, {relationships: {arguments: {to: ref('dim_customer'), field: customer_key}}}]}
+      - {name: product_key, description: CORE product version key., tests: [not_null, {relationships: {arguments: {to: ref('dim_product'), field: product_key}}}]}
+      - {name: warehouse_key, description: CORE warehouse key., tests: [not_null, {relationships: {arguments: {to: ref('dim_warehouse'), field: warehouse_key}}}]}
+      - {name: revenue_amount, description: Additive recognized revenue for delivered order lines only.}
+      - {name: booked_order_amount, description: Additive net order value across all eligible statuses.}
+      - {name: delivered_quantity, description: Additive realized units from delivered order lines only.}
+      - {name: delivered_order_line_count, description: Count of delivered lines, the revenue recognition cohort.}
+      - {name: processing_order_line_count, description: Count of processing lines.}
+      - {name: backordered_order_line_count, description: Count of backordered lines.}
+      - {name: partially_fulfilled_order_line_count, description: Count of partially fulfilled lines.}
+      - {name: cancelled_order_line_count, description: Count of cancelled lines.}
+      - {name: revenue_recognized_order_line_count, description: Count of delivered lines included in revenue recognition.}
+      - {name: cost_of_goods_sold, description: Additive cost of goods sold.}
+      - {name: gross_profit_amount, description: Additive gross profit.}
+      - {name: gross_margin_rate, description: Aggregate gross profit divided by aggregate revenue.}
+      - {name: product_history_fallback_line_count, description: Number of order lines using earliest-observed product version.}
+  - name: return_monthly
+    description: >-
+      Eligible CORE returns aggregated by return_month, customer_key, product_key,
+      and warehouse_key. This is the authoritative monthly returns/refunds view
+      and includes valid returns whose linked order is quarantined or otherwise
+      absent from sales_order_line.
+    tests:
+      - unique_combination_of_columns: {arguments: {combination_of_columns: [return_month, customer_key, product_key, warehouse_key]}}
+    columns:
+      - {name: return_month, description: First calendar day of return month., tests: [not_null]}
+      - {name: customer_key, description: CORE customer key., tests: [not_null, {relationships: {arguments: {to: ref('dim_customer'), field: customer_key}}}]}
+      - {name: product_key, description: CORE return product version key., tests: [not_null, {relationships: {arguments: {to: ref('dim_product'), field: product_key}}}]}
+      - {name: warehouse_key, description: CORE warehouse key., tests: [not_null, {relationships: {arguments: {to: ref('dim_warehouse'), field: warehouse_key}}}]}
+      - {name: return_count, description: Count of eligible CORE return facts., tests: [not_null]}
+      - {name: returned_quantity, description: Additive returned units., tests: [not_null]}
+      - {name: refund_amount, description: Additive CORE refund amount, independent of sales order eligibility., tests: [not_null]}
+      - {name: warning_return_count, description: Eligible returns with source quality WARNING.}
+      - {name: upstream_warning_order_count, description: Returns with WARNING order context.}
+      - {name: upstream_quarantined_order_count, description: Returns retained with QUARANTINED order context.}
+      - {name: product_history_fallback_return_count, description: Returns using earliest-observed product version.}

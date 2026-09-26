@@ -1,0 +1,128 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "supplier_performance",
+  "position": {
+    "x": 40,
+    "y": 264,
+    "z": 0,
+    "height": 332,
+    "width": 900,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "pivotTable",
+    "query": {
+      "queryState": {
+        "Rows": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Supplier"
+                    }
+                  },
+                  "Property": "supplier_name"
+                }
+              },
+              "queryRef": "Supplier.supplier_name",
+              "nativeQueryRef": "supplier_name",
+              "active": true,
+              "displayName": "Supplier"
+            }
+          ]
+        },
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Supplier Spend"
+                }
+              },
+              "queryRef": "Report Measures.Supplier Spend",
+              "nativeQueryRef": "Supplier Spend"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Supplier OTIF %"
+                }
+              },
+              "queryRef": "Report Measures.Supplier OTIF %",
+              "nativeQueryRef": "Supplier OTIF %"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Supplier Fill Rate %"
+                }
+              },
+              "queryRef": "Report Measures.Supplier Fill Rate %",
+              "nativeQueryRef": "Supplier Fill Rate %"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Average Lead Time Days"
+                }
+              },
+              "queryRef": "Report Measures.Average Lead Time Days",
+              "nativeQueryRef": "Average Lead Time Days"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Lead Time Variability Days"
+                }
+              },
+              "queryRef": "Report Measures.Lead Time Variability Days",
+              "nativeQueryRef": "Lead Time Variability Days"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

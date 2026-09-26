@@ -1,0 +1,99 @@
+table SupplierLine
+	lineageTag: 6f229c01-3723-4d4b-bdad-5cce89ad0f50
+
+	column supplier_key
+		dataType: string
+		isHidden
+		lineageTag: ad819a5f-554f-466c-9588-c70b65832a08
+		summarizeBy: none
+		sourceColumn: supplier_key
+
+	column po_line_id
+		dataType: string
+		lineageTag: ccef24ea-84dc-4058-8ca3-dd0d76c10416
+		summarizeBy: none
+		sourceColumn: po_line_id
+
+	column purchase_order_id
+		dataType: string
+		lineageTag: 260311f2-c83c-41a9-a2ca-41784ea5c38d
+		summarizeBy: none
+		sourceColumn: purchase_order_id
+
+	column expected_delivery_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: e01ea405-5460-46c6-af74-bc2f56451454
+		summarizeBy: none
+		sourceColumn: expected_delivery_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column received_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 9a73d3a4-6964-4d24-ba5d-1ec7fa3e9690
+		summarizeBy: none
+		sourceColumn: received_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column due_month
+		dataType: dateTime
+		isHidden
+		formatString: Long Date
+		lineageTag: edb11c91-c764-4ba4-ba72-f3032071ef29
+		summarizeBy: none
+		sourceColumn: due_month
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column ordered_quantity
+		dataType: double
+		lineageTag: 67531c14-7d0e-4689-9853-fbdd5cd6eed4
+		summarizeBy: sum
+		sourceColumn: ordered_quantity
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column received_quantity
+		dataType: double
+		lineageTag: 1be16f12-9497-4380-99fc-2c31ec74689d
+		summarizeBy: sum
+		sourceColumn: received_quantity
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column status
+		dataType: string
+		lineageTag: 6ccf54fb-4dc0-44f1-b7fb-e2d27234185e
+		summarizeBy: none
+		sourceColumn: status
+
+	column is_late_as_of_cutoff
+		dataType: double
+		isHidden
+		lineageTag: 2db89914-616f-4d06-b5b5-37f44fe16f63
+		summarizeBy: sum
+		sourceColumn: is_late_as_of_cutoff
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition SupplierLine = m
+		mode: import
+		source =
+				let
+				    Raw = #"DevTable"("MARTS", "SUPPLIER_DETAIL"),
+				    Selected = Table.SelectColumns(Raw, {"SUPPLIER_KEY", "PO_LINE_ID", "PURCHASE_ORDER_ID", "EXPECTED_DELIVERY_DATE", "RECEIVED_DATE", "ORDERED_QUANTITY", "RECEIVED_QUANTITY", "STATUS", "IS_LATE_AS_OF_CUTOFF"}),
+				    Lower = Table.TransformColumnNames(Selected, Text.Lower),
+				    Late = Table.SelectRows(Lower, each [is_late_as_of_cutoff] = 1),
+				    Result = Table.AddColumn(Late, "due_month", each if [expected_delivery_date] = null then null else Date.StartOfMonth(Date.From([expected_delivery_date])), type date)
+				in
+				    Result
+

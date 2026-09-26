@@ -1,0 +1,69 @@
+{
+  "position": {
+    "width": 576,
+    "y": 808,
+    "z": 0,
+    "x": 1304,
+    "tabOrder": 0,
+    "height": 64
+  },
+  "name": "transfer_summary",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Transfer Candidate Count"
+                }
+              },
+              "nativeQueryRef": "Transfer Candidate Count",
+              "queryRef": "Report Measures.Transfer Candidate Count"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Transfer Units"
+                }
+              },
+              "nativeQueryRef": "Transfer Units",
+              "queryRef": "Report Measures.Transfer Units"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "value": [
+        {
+          "properties": {
+            "labelDisplayUnits": {
+              "expr": {
+                "Literal": {
+                  "Value": "1L"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
+          }
+        }
+      ]
+    }
+  }
+}

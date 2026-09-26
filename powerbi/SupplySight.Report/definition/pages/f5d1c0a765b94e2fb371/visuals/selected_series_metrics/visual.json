@@ -1,0 +1,65 @@
+{
+  "position": {
+    "width": 856,
+    "y": 128,
+    "z": 0,
+    "x": 1024,
+    "tabOrder": 0,
+    "height": 112
+  },
+  "name": "selected_series_metrics",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Selected Test MAE"
+                }
+              },
+              "nativeQueryRef": "Selected Test MAE",
+              "queryRef": "Report Measures.Selected Test MAE"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Selected Test RMSE"
+                }
+              },
+              "nativeQueryRef": "Selected Test RMSE",
+              "queryRef": "Report Measures.Selected Test RMSE"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Selected Test WAPE"
+                }
+              },
+              "nativeQueryRef": "Selected Test WAPE",
+              "queryRef": "Report Measures.Selected Test WAPE"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

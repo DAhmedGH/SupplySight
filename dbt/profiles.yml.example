@@ -1,0 +1,15 @@
+supplysight:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('SNOWFLAKE_USER') }}"
+      role: "{{ env_var('SNOWFLAKE_ROLE') }}"
+      database: SUPPLY_CHAIN_DEV
+      warehouse: SUPPLY_CHAIN_DEV_WH
+      schema: STAGING
+      threads: 4
+      client_session_keep_alive: false
+      private_key_path: "{{ env_var('SNOWFLAKE_PRIVATE_KEY_FILE') }}"
+      private_key_passphrase: "{{ env_var('SNOWFLAKE_PRIVATE_KEY_PASSPHRASE', '') }}"

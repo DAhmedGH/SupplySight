@@ -1,0 +1,93 @@
+{
+  "position": {
+    "width": 1840,
+    "y": 624,
+    "z": 0,
+    "x": 40,
+    "tabOrder": 0,
+    "height": 104
+  },
+  "name": "logistics_kpis",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Shipment Count"
+                }
+              },
+              "nativeQueryRef": "Shipment Count",
+              "queryRef": "Report Measures.Shipment Count"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Shipped Units"
+                }
+              },
+              "nativeQueryRef": "Shipped Units",
+              "queryRef": "Report Measures.Shipped Units"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Completion %"
+                }
+              },
+              "nativeQueryRef": "Completion %",
+              "queryRef": "Report Measures.Completion %"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "On-time Delivery %"
+                }
+              },
+              "nativeQueryRef": "On-time Delivery %",
+              "queryRef": "Report Measures.On-time Delivery %"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Average Transit Days"
+                }
+              },
+              "nativeQueryRef": "Average Transit Days",
+              "queryRef": "Report Measures.Average Transit Days"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

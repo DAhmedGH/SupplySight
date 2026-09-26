@@ -1,0 +1,204 @@
+table 'Report Measures'
+	lineageTag: bcf326bc-3858-4e05-82a8-c7c3cd373c9b
+
+	measure Revenue = SUM(SalesMonth[revenue_amount])
+		formatString: #,##0.00
+		lineageTag: 94acd4e4-fbfd-455a-a019-0a0d6eb95d1f
+
+	measure 'Gross Profit' = SUM(SalesMonth[gross_profit_amount])
+		formatString: #,##0.00
+		lineageTag: a6127179-fcb5-460e-826f-c06f076ba579
+
+	measure 'Gross Margin %' = DIVIDE([Gross Profit], [Revenue])
+		formatString: 0.0%
+		lineageTag: 71291885-de36-48b1-9f03-ee68f8daeb07
+
+	measure 'Recorded Order Demand' = SUM(SalesMonth[ordered_quantity])
+		formatString: #,##0
+		lineageTag: e80b3337-70db-4b18-b241-1ff7f7f1f04c
+
+	measure 'Month-end Inventory Value' = VAR LastMonth = MAXX(FILTER(VALUES(CalendarMonth[month_start]), CALCULATE(COUNTROWS(InventoryMonth)) > 0), CalendarMonth[month_start]) RETURN CALCULATE(SUM(InventoryMonth[month_end_inventory_value]), CalendarMonth[month_start] = LastMonth)
+		formatString: #,##0.00
+		lineageTag: 8050b346-3261-4443-94bb-feb2d68135d8
+
+	measure 'Trailing 90d Inventory Turnover' = VAR LastMonth = MAXX(FILTER(VALUES(CalendarMonth[month_start]), CALCULATE(COUNTROWS(InventoryMonth)) > 0), CalendarMonth[month_start]) RETURN CALCULATE(DIVIDE(SUM(InventoryMonth[inventory_turnover_numerator]), SUM(InventoryMonth[inventory_turnover_denominator])), CalendarMonth[month_start] = LastMonth)
+		formatString: 0.00
+		lineageTag: f9838b39-d060-45b9-95e6-105e16dcad62
+
+	measure 'Trailing 90d Days of Supply' = VAR LastMonth = MAXX(FILTER(VALUES(CalendarMonth[month_start]), CALCULATE(COUNTROWS(InventoryMonth)) > 0), CalendarMonth[month_start]) RETURN CALCULATE(DIVIDE(SUM(InventoryMonth[avg_available_units]), DIVIDE(SUM(InventoryMonth[demand_units_trailing_90d]), 90)), CalendarMonth[month_start] = LastMonth)
+		formatString: 0.0
+		lineageTag: 7ec3ce0d-e677-454a-ab17-ca56c623c376
+
+	measure 'Excess Units' = CALCULATE(SUM(InventoryMonth[month_end_excess_units]), CalendarMonth[month_start] = DATE(2024,12,1))
+		formatString: #,##0
+		lineageTag: 73f15c48-7d9e-4966-bce3-2b396f86f9bd
+
+	measure 'Excess Value' = CALCULATE(SUM(InventoryMonth[month_end_excess_value]), CalendarMonth[month_start] = DATE(2024,12,1))
+		formatString: #,##0.00
+		lineageTag: 483e86b6-7785-43a1-9b0b-d29c33e2e181
+
+	measure 'Dead Stock Units' = CALCULATE(SUM(InventoryMonth[dead_stock_units]), CalendarMonth[month_start] = DATE(2024,12,1))
+		formatString: #,##0
+		lineageTag: 35952653-ad04-4a91-8ab6-6f0fe992671a
+
+	measure 'Dead Stock Value' = CALCULATE(SUM(InventoryMonth[dead_stock_value]), CalendarMonth[month_start] = DATE(2024,12,1))
+		formatString: #,##0.00
+		lineageTag: 45879a6b-ea60-4cbf-86c4-d55ac5414e36
+
+	measure 'Supplier Spend' = SUM(SupplierSpendMonth[supplier_spend])
+		formatString: #,##0.00
+		lineageTag: 7e556ff6-c461-49b1-84e0-369dfa05cc16
+
+	measure 'Supplier OTIF %' = DIVIDE(SUM(SupplierServiceMonth[otif_numerator]), SUM(SupplierServiceMonth[otif_denominator]))
+		formatString: 0.0%
+		lineageTag: 192f5294-75fd-4327-9fc2-93c1d24dbec0
+
+	measure 'Supplier Fill Rate %' = DIVIDE(SUM(SupplierServiceMonth[fill_rate_numerator]), SUM(SupplierServiceMonth[fill_rate_denominator]))
+		formatString: 0.0%
+		lineageTag: 174d392e-c4e3-431c-8021-0c746fc867e3
+
+	measure 'Average Lead Time Days' = DIVIDE(SUM(SupplierServiceMonth[lead_time_numerator_days]), SUM(SupplierServiceMonth[lead_time_denominator_count]))
+		formatString: 0.0
+		lineageTag: 58ff104a-3b0c-47db-9907-45fe0541a384
+
+	measure 'Lead Time Variability Days' = IF(HASONEVALUE(Supplier[supplier_key]) && HASONEVALUE(CalendarMonth[month_start]), SELECTEDVALUE(SupplierServiceMonth[observed_lead_time_stddev_days]))
+		formatString: 0.0
+		lineageTag: da950ccf-5dd6-41ea-a686-ca8a204e881c
+
+	measure 'Late Due PO Lines' = SUM(SupplierServiceMonth[late_purchase_order_count])
+		formatString: #,##0
+		lineageTag: 73be473a-953a-4b5f-a7a4-d8dcfd29eb37
+
+	measure 'Shipment Count' = SUM(LogisticsMonth[shipment_count])
+		formatString: #,##0
+		lineageTag: 35930146-5d4d-4679-b98c-102175cc3e50
+
+	measure 'Shipped Units' = SUM(LogisticsMonth[shipped_quantity])
+		formatString: #,##0
+		lineageTag: 186e89b6-e801-4574-a34c-b4accdb25df8
+
+	measure 'Completion %' = DIVIDE(SUM(LogisticsMonth[completed_shipment_count]), [Shipment Count])
+		formatString: 0.0%
+		lineageTag: fb65571b-c5ca-4f8d-b707-bc24d9c94378
+
+	measure 'On-time Delivery %' = DIVIDE(SUM(LogisticsMonth[on_time_shipment_count]), SUM(LogisticsMonth[timeliness_eligible_count]))
+		formatString: 0.0%
+		lineageTag: bdfaf863-0ede-4042-9474-daee5d28edcb
+
+	measure 'Average Transit Days' = DIVIDE(SUMX(LogisticsMonth, LogisticsMonth[average_transit_days] * LogisticsMonth[completed_shipment_count]), SUMX(FILTER(LogisticsMonth, NOT ISBLANK(LogisticsMonth[average_transit_days])), LogisticsMonth[completed_shipment_count]))
+		formatString: 0.0
+		lineageTag: 8b0baa6b-2885-4800-b9f4-64ed6c88638f
+
+	measure 'Forecast Demand' = SUM(ForecastMonth[predicted_demand])
+		formatString: #,##0.0
+		lineageTag: d560d4e6-aec5-4656-8ca1-31c44a6a807a
+
+	measure 'Forecast Lower Bound' = SUM(ForecastMonth[lower_bound])
+		formatString: #,##0.0
+		lineageTag: b01be720-e615-4a71-8147-ec5ac5ed761c
+
+	measure 'Forecast Upper Bound' = SUM(ForecastMonth[upper_bound])
+		formatString: #,##0.0
+		lineageTag: adf16b93-6f87-473d-adf5-85b2bb004e95
+
+	measure 'Baseline Validation MAE' = CALCULATE(AVERAGEX(FILTER(ForecastEvaluation, NOT ISBLANK(ForecastEvaluation[baseline_mae]) && NOT ISBLANK(ForecastEvaluation[candidate_mae])), ForecastEvaluation[baseline_mae]), REMOVEFILTERS(Product), REMOVEFILTERS(Warehouse))
+		formatString: 0.00
+		lineageTag: 30b4a8e9-251f-470b-ab70-7f559f79e5ed
+
+	measure 'Holt Validation MAE' = CALCULATE(AVERAGEX(FILTER(ForecastEvaluation, NOT ISBLANK(ForecastEvaluation[baseline_mae]) && NOT ISBLANK(ForecastEvaluation[candidate_mae])), ForecastEvaluation[candidate_mae]), REMOVEFILTERS(Product), REMOVEFILTERS(Warehouse))
+		formatString: 0.00
+		lineageTag: d633c30c-276d-4095-ac90-a26e39c56027
+
+	measure 'Selected Test MAE' = IF(HASONEVALUE(Product[product_id]) && HASONEVALUE(Warehouse[warehouse_key]), SELECTEDVALUE(ForecastEvaluation[test_mae]))
+		formatString: 0.00
+		lineageTag: e0290d01-ed73-4e37-93dc-be0f0be4b183
+
+	measure 'Selected Test RMSE' = IF(HASONEVALUE(Product[product_id]) && HASONEVALUE(Warehouse[warehouse_key]), SELECTEDVALUE(ForecastEvaluation[test_rmse]))
+		formatString: 0.00
+		lineageTag: 8e0e2a1e-4fb3-41cf-982b-9bee18d2ead2
+
+	measure 'Selected Test WAPE' = IF(HASONEVALUE(Product[product_id]) && HASONEVALUE(Warehouse[warehouse_key]), SELECTEDVALUE(ForecastEvaluation[test_wape]))
+		formatString: 0.0%
+		lineageTag: 71d5a66e-ad15-44fb-b3d7-8d14ba86ed0f
+
+	measure 'Risk Positions' = COUNTROWS(Recommendation)
+		formatString: #,##0
+		lineageTag: f755cc89-dc1e-48c6-8511-88f89e7a9d1e
+
+	measure 'Critical / High Positions' = CALCULATE(COUNTROWS(Recommendation), Recommendation[stockout_risk_tier] IN {"CRITICAL", "HIGH"})
+		formatString: #,##0
+		lineageTag: e3a13a03-ef71-4a63-a511-cc7ab40e74cb
+
+	measure 'Expected Shortage Units' = SUM(Recommendation[expected_shortage_units])
+		formatString: #,##0
+		lineageTag: ac9ed5a9-5fd6-4de3-ab53-6b918aba521a
+
+	measure 'Stressed Shortage Units' = SUM(Recommendation[stressed_shortage_units])
+		formatString: #,##0.0
+		lineageTag: 1bac5aed-5b3f-4737-a63a-aef3bae89e25
+
+	measure 'Suggested Reorder Units' = SUM(Recommendation[suggested_reorder_units])
+		formatString: #,##0
+		lineageTag: a7dd38da-d434-4af7-9c27-6f0c8c74dda3
+
+	measure 'Reorder Positions' = COUNTROWS(FILTER(Recommendation, Recommendation[suggested_reorder_units] > 0))
+		formatString: #,##0
+		lineageTag: 6ca2a6f6-c14b-43cf-8429-690f4c214c68
+
+	measure 'Scheduled Inbound Units' = SUM(Recommendation[scheduled_inbound_units_total])
+		formatString: #,##0
+		lineageTag: 2dfd617c-a9c9-4b27-b29c-9f6349e4c4e3
+
+	measure 'Potential Revenue Exposure' = SUM(Recommendation[potential_revenue_exposure])
+		formatString: #,##0.00
+		lineageTag: 0818c85f-0676-46fd-b979-21d62c9216d5
+
+	measure 'Transfer Candidate Count' = COUNTROWS(Transfer)
+		formatString: #,##0
+		lineageTag: d0ab6d8c-90c6-4f97-a7cb-ab562987a54d
+
+	measure 'Transfer Units' = SUM(Transfer[transfer_units])
+		formatString: #,##0
+		lineageTag: effbbe17-274d-46ff-b3ce-4e491b91052e
+
+	measure 'Planning Point Demand' = SUM(PlanningMonth[point_demand_units])
+		formatString: #,##0.0
+		lineageTag: da5a346a-9ed6-4f58-99ad-90bc1cecf856
+
+	measure 'Planning Upper Demand' = SUM(PlanningMonth[upper_demand_units])
+		formatString: #,##0.0
+		lineageTag: d690d18d-3908-4eb5-bd6e-a54899826e6d
+
+	measure 'Monthly Scheduled Inbound' = SUM(PlanningMonth[scheduled_inbound_units])
+		formatString: #,##0
+		lineageTag: 3adb934d-0de4-4e0e-a7a0-ff8827518b8f
+
+	measure 'Opening Point Inventory' = IF(HASONEVALUE(CalendarMonth[month_start]), SUM(PlanningMonth[opening_point_inventory]))
+		formatString: #,##0.0
+		lineageTag: af8e2b69-e23c-48ce-97e1-3cdde1cb1776
+
+	measure 'Closing Point Inventory' = IF(HASONEVALUE(CalendarMonth[month_start]), SUM(PlanningMonth[closing_point_inventory]))
+		formatString: #,##0.0
+		lineageTag: 07c08476-2804-44df-ae57-f9705b854d46
+
+	measure 'Opening Stress Inventory' = IF(HASONEVALUE(CalendarMonth[month_start]), SUM(PlanningMonth[opening_stress_inventory]))
+		formatString: #,##0.0
+		lineageTag: bc46f183-1d17-4597-8d95-dd15fe3aa626
+
+	measure 'Closing Stress Inventory' = IF(HASONEVALUE(CalendarMonth[month_start]), SUM(PlanningMonth[closing_stress_inventory]))
+		formatString: #,##0.0
+		lineageTag: 30ac34df-14d5-466d-ad39-7dcf88737fef
+
+	measure 'Baseline Selected Series Count' = CALCULATE(COUNTROWS(ForecastEvaluation), ForecastEvaluation[selected_model] = "trailing_3_mean", REMOVEFILTERS(Product), REMOVEFILTERS(Warehouse))
+		formatString: #,##0
+		lineageTag: 02f91932-4555-4a61-b622-91d8868e7b79
+
+	column Dummy
+		lineageTag: 2b6e41cc-8b94-43ae-abef-217edb84ff86
+		isNameInferred
+		sourceColumn: [Dummy]
+
+	partition 'Report Measures' = calculated
+		mode: import
+		source = ROW("Dummy", 1)
+

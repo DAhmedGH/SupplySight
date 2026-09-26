@@ -1,0 +1,114 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "demand_and_forecast",
+  "position": {
+    "x": 40,
+    "y": 280,
+    "z": 0,
+    "height": 500,
+    "width": 1260,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "lineChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "CalendarMonth"
+                    }
+                  },
+                  "Property": "month_start"
+                }
+              },
+              "queryRef": "CalendarMonth.month_start",
+              "nativeQueryRef": "month_start",
+              "active": true,
+              "displayName": "Month"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Recorded Order Demand"
+                }
+              },
+              "queryRef": "Report Measures.Recorded Order Demand",
+              "nativeQueryRef": "Recorded Order Demand"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Forecast Demand"
+                }
+              },
+              "queryRef": "Report Measures.Forecast Demand",
+              "nativeQueryRef": "Forecast Demand"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Forecast Lower Bound"
+                }
+              },
+              "queryRef": "Report Measures.Forecast Lower Bound",
+              "nativeQueryRef": "Forecast Lower Bound"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Forecast Upper Bound"
+                }
+              },
+              "queryRef": "Report Measures.Forecast Upper Bound",
+              "nativeQueryRef": "Forecast Upper Bound"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

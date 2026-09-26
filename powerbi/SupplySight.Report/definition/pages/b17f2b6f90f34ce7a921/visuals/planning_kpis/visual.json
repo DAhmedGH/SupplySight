@@ -1,0 +1,111 @@
+{
+  "position": {
+    "width": 1840,
+    "y": 128,
+    "z": 0,
+    "x": 40,
+    "tabOrder": 0,
+    "height": 112
+  },
+  "name": "planning_kpis",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Expected Shortage Units"
+                }
+              },
+              "nativeQueryRef": "Expected Shortage Units",
+              "queryRef": "Report Measures.Expected Shortage Units"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Stressed Shortage Units"
+                }
+              },
+              "nativeQueryRef": "Stressed Shortage Units",
+              "queryRef": "Report Measures.Stressed Shortage Units"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Suggested Reorder Units"
+                }
+              },
+              "nativeQueryRef": "Suggested Reorder Units",
+              "queryRef": "Report Measures.Suggested Reorder Units"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Scheduled Inbound Units"
+                }
+              },
+              "nativeQueryRef": "Scheduled Inbound Units",
+              "queryRef": "Report Measures.Scheduled Inbound Units"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Potential Revenue Exposure"
+                }
+              },
+              "nativeQueryRef": "Potential Revenue Exposure",
+              "queryRef": "Report Measures.Potential Revenue Exposure"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "value": [
+        {
+          "properties": {
+            "labelDisplayUnits": {
+              "expr": {
+                "Literal": {
+                  "Value": "1L"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
+          }
+        }
+      ]
+    }
+  }
+}

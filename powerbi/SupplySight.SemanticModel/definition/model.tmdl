@@ -1,0 +1,37 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-US
+	valueFilterBehavior: independent
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_ProTooling = ["DevMode"]
+
+annotation PBI_QueryOrder = ["CalendarMonth","Product","Warehouse","SourceWarehouse","Supplier","Carrier","SalesMonth","InventoryMonth","SupplierSpendMonth","SupplierServiceMonth","SupplierLine","LogisticsMonth","ForecastRun","ForecastMonth","ForecastEvaluation","PlanningMonth","Recommendation","Transfer","SnowflakeServer","DevTable","ProductVersionLookup","ScenarioRunId"]
+
+ref table CalendarMonth
+ref table Product
+ref table Warehouse
+ref table SourceWarehouse
+ref table Supplier
+ref table Carrier
+ref table SalesMonth
+ref table InventoryMonth
+ref table SupplierSpendMonth
+ref table SupplierServiceMonth
+ref table SupplierLine
+ref table LogisticsMonth
+ref table ForecastRun
+ref table ForecastMonth
+ref table ForecastEvaluation
+ref table PlanningMonth
+ref table Recommendation
+ref table Transfer
+ref table 'Report Measures'
+
+ref cultureInfo en-US
+

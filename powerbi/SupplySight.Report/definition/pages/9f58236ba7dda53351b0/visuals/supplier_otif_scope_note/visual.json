@@ -1,0 +1,37 @@
+{
+  "position": {
+    "width": 1840,
+    "y": 260,
+    "z": 1,
+    "x": 40,
+    "tabOrder": 0,
+    "height": 16
+  },
+  "name": "supplier_otif_scope_note",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "textStyle": {
+                      "fontFamily": "Segoe UI",
+                      "fontWeight": "regular",
+                      "fontSize": "9pt"
+                    },
+                    "value": "Supplier OTIF is all-supplier scope; product and warehouse selections do not apply."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

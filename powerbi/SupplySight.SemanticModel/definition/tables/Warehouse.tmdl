@@ -1,0 +1,49 @@
+table Warehouse
+	lineageTag: 09c022a8-29d2-4214-b2fe-fd915f0f1177
+
+	column warehouse_key
+		dataType: string
+		isHidden
+		lineageTag: 25973daa-1014-4f60-b6c0-0b990832c113
+		summarizeBy: none
+		sourceColumn: warehouse_key
+
+	column warehouse_name
+		dataType: string
+		lineageTag: e4713dc3-a274-4e1a-94a7-b3c7e8058083
+		summarizeBy: none
+		sourceColumn: warehouse_name
+
+	column region
+		dataType: string
+		lineageTag: f5ff01bb-0250-4b53-b054-a99c4b9a77b4
+		summarizeBy: none
+		sourceColumn: region
+
+	column country
+		dataType: string
+		lineageTag: 18408ea0-ee09-492d-9bda-1ecf5adcddb3
+		summarizeBy: none
+		sourceColumn: country
+
+	hierarchy 'Region to Warehouse'
+		lineageTag: 55e3c147-3369-4484-a005-4d789f95e2f5
+
+		level Region
+			lineageTag: 20028afd-79b4-47d3-9745-8a8c757ea9f0
+			column: region
+
+		level Warehouse
+			lineageTag: 67c5f563-8392-46a6-8ef8-1c28ddc87263
+			column: warehouse_name
+
+	partition Warehouse = m
+		mode: import
+		source =
+				let
+				    Raw = #"DevTable"("CORE", "DIM_WAREHOUSE"),
+				    Selected = Table.SelectColumns(Raw, {"WAREHOUSE_KEY", "WAREHOUSE_NAME", "REGION", "COUNTRY"}),
+				    Lower = Table.TransformColumnNames(Selected, Text.Lower)
+				in
+				    Lower
+

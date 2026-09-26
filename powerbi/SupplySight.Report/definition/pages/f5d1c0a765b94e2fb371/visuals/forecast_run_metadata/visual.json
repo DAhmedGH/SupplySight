@@ -1,0 +1,172 @@
+{
+  "position": {
+    "width": 1260,
+    "y": 816,
+    "z": 0,
+    "x": 40,
+    "tabOrder": 0,
+    "height": 160
+  },
+  "name": "forecast_run_metadata",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ForecastRun"
+                    }
+                  },
+                  "Property": "status"
+                }
+              },
+              "nativeQueryRef": "status",
+              "queryRef": "ForecastRun.status",
+              "displayName": "Status"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ForecastRun"
+                    }
+                  },
+                  "Property": "observed_through"
+                }
+              },
+              "nativeQueryRef": "observed_through",
+              "queryRef": "ForecastRun.observed_through",
+              "displayName": "Observed Through"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ForecastRun"
+                    }
+                  },
+                  "Property": "horizon"
+                }
+              },
+              "nativeQueryRef": "horizon",
+              "queryRef": "ForecastRun.horizon",
+              "displayName": "Horizon"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ForecastRun"
+                    }
+                  },
+                  "Property": "series_attempted"
+                }
+              },
+              "nativeQueryRef": "series_attempted",
+              "queryRef": "ForecastRun.series_attempted",
+              "displayName": "Series Attempted"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ForecastRun"
+                    }
+                  },
+                  "Property": "series_succeeded"
+                }
+              },
+              "nativeQueryRef": "series_succeeded",
+              "queryRef": "ForecastRun.series_succeeded",
+              "displayName": "Series Succeeded"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ForecastRun"
+                    }
+                  },
+                  "Property": "series_fallback"
+                }
+              },
+              "nativeQueryRef": "series_fallback",
+              "queryRef": "ForecastRun.series_fallback",
+              "displayName": "Series Fallback"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ForecastRun"
+                    }
+                  },
+                  "Property": "records_produced"
+                }
+              },
+              "nativeQueryRef": "records_produced",
+              "queryRef": "ForecastRun.records_produced",
+              "displayName": "Records Produced"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Historical Forecast Run'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "objects": {
+      "columnHeaders": [
+        {
+          "properties": {
+            "columnAdjustment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'growToFit'"
+                }
+              }
+            },
+            "autoSizeColumnWidth": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

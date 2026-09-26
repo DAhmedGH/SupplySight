@@ -1,0 +1,38 @@
+version: 2
+
+models:
+  - name: mart_quality_exceptions
+    description: One excluded fact-grain record, with its ingestion lineage and exclusion reason; this audit view reads the intermediate exception register.
+    tests:
+      - unique_combination_of_columns: {arguments: {combination_of_columns: [source_entity, source_key]}}
+    columns:
+      - {name: source_entity, tests: [not_null]}
+      - {name: source_key, tests: [not_null]}
+      - {name: exclusion_reason, tests: [not_null]}
+      - {name: ingested_at, tests: [not_null]}
+      - {name: ingestion_month, tests: [not_null]}
+  - name: mart_quality_exceptions_monthly
+    description: Excluded fact-grain records by ingestion month, source entity, and exclusion reason; counts are separate from eligible business metrics.
+    tests:
+      - unique_combination_of_columns: {arguments: {combination_of_columns: [ingestion_month, source_entity, exclusion_reason]}}
+    columns:
+      - {name: ingestion_month, tests: [not_null]}
+      - {name: source_entity, tests: [not_null]}
+      - {name: exclusion_reason, tests: [not_null]}
+      - {name: excluded_record_count, tests: [not_null]}
+  - name: mart_executive_monthly
+    description: One row per calendar month, combining already aggregated domain measures; exception counts use ingestion month.
+    columns:
+      - {name: month_start, tests: [not_null, unique, {relationships: {arguments: {to: ref('dim_date'), field: date_day}}}]}
+      - {name: order_line_count, tests: [not_null]}
+      - {name: revenue_amount, tests: [not_null]}
+      - {name: cost_of_goods_sold, tests: [not_null]}
+      - {name: gross_profit_amount, tests: [not_null]}
+      - {name: return_count, tests: [not_null]}
+      - {name: month_end_inventory_value, description: Sum of last observed monthly inventory values; nullable when no inventory snapshots exist.}
+      - {name: supplier_otif_numerator, tests: [not_null]}
+      - {name: supplier_otif_denominator, tests: [not_null]}
+      - {name: supplier_fill_numerator, tests: [not_null]}
+      - {name: supplier_fill_denominator, tests: [not_null]}
+      - {name: shipment_count, tests: [not_null]}
+      - {name: excluded_record_count_by_ingestion_month, tests: [not_null]}

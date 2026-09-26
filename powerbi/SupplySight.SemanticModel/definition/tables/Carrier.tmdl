@@ -1,0 +1,26 @@
+table Carrier
+	lineageTag: 8ef4b5d1-f908-4d9b-aab0-ea56b0bb3e5b
+
+	column carrier_key
+		dataType: string
+		isHidden
+		lineageTag: c2f6f505-4f96-4017-9af0-cafbdee394ac
+		summarizeBy: none
+		sourceColumn: carrier_key
+
+	column carrier_name
+		dataType: string
+		lineageTag: bd6c68fa-78e8-44a0-b64b-49b7099fe962
+		summarizeBy: none
+		sourceColumn: carrier_name
+
+	partition Carrier = m
+		mode: import
+		source =
+				let
+				    Raw = #"DevTable"("CORE", "DIM_CARRIER"),
+				    Selected = Table.SelectColumns(Raw, {"CARRIER_KEY", "CARRIER_NAME"}),
+				    Lower = Table.TransformColumnNames(Selected, Text.Lower)
+				in
+				    Lower
+

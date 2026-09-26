@@ -1,0 +1,179 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "transfer_candidates",
+  "position": {
+    "x": 1304,
+    "y": 880,
+    "z": 0,
+    "height": 168,
+    "width": 576,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "SourceWarehouse"
+                    }
+                  },
+                  "Property": "warehouse_name"
+                }
+              },
+              "queryRef": "SourceWarehouse.warehouse_name",
+              "nativeQueryRef": "source_warehouse_name",
+              "displayName": "Source Warehouse"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Warehouse"
+                    }
+                  },
+                  "Property": "warehouse_name"
+                }
+              },
+              "queryRef": "Warehouse.warehouse_name",
+              "nativeQueryRef": "destination_warehouse_name",
+              "displayName": "Destination Warehouse"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Product"
+                    }
+                  },
+                  "Property": "sku"
+                }
+              },
+              "queryRef": "Product.sku",
+              "nativeQueryRef": "sku",
+              "displayName": "SKU"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Transfer Units"
+                }
+              },
+              "queryRef": "Report Measures.Transfer Units",
+              "nativeQueryRef": "Transfer Units"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "columnHeaders": [
+        {
+          "properties": {
+            "columnAdjustment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'growToFit'"
+                }
+              }
+            },
+            "autoSizeColumnWidth": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "a2d098412577945ca374",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "SourceWarehouse"
+              }
+            },
+            "Property": "warehouse_name"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "46a98c87cd008976cb1a",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Warehouse"
+              }
+            },
+            "Property": "warehouse_name"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "9c8c92dc244bebcaee00",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Product"
+              }
+            },
+            "Property": "sku"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "15862393886b28b89363",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Report Measures"
+              }
+            },
+            "Property": "Transfer Units"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
+  }
+}

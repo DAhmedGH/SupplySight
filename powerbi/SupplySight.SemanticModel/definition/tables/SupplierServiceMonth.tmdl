@@ -1,0 +1,114 @@
+table SupplierServiceMonth
+	lineageTag: 8027a34f-73e9-4bb5-a134-c155c4ade740
+
+	column month_start
+		dataType: dateTime
+		isHidden
+		formatString: Long Date
+		lineageTag: ba40b019-5636-40f0-8bd0-8738fe33627f
+		summarizeBy: none
+		sourceColumn: month_start
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column supplier_key
+		dataType: string
+		isHidden
+		lineageTag: 43914731-637f-4315-a859-f9dda2a3bd87
+		summarizeBy: none
+		sourceColumn: supplier_key
+
+	column otif_numerator
+		dataType: double
+		isHidden
+		lineageTag: 24411ee5-52bc-4c25-92da-f63d373e0643
+		summarizeBy: sum
+		sourceColumn: otif_numerator
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column otif_denominator
+		dataType: double
+		isHidden
+		lineageTag: 9debeef4-f5a4-4c72-9b2d-987a65a23027
+		summarizeBy: sum
+		sourceColumn: otif_denominator
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column fill_rate_numerator
+		dataType: double
+		isHidden
+		lineageTag: 10af9496-38ac-4fa8-9332-af8b52f538a7
+		summarizeBy: sum
+		sourceColumn: fill_rate_numerator
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column fill_rate_denominator
+		dataType: double
+		isHidden
+		lineageTag: a6b5bc41-175c-46bb-b1e7-b77f2597abdc
+		summarizeBy: sum
+		sourceColumn: fill_rate_denominator
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column lead_time_numerator_days
+		dataType: double
+		isHidden
+		lineageTag: 6c58d2a7-b662-445a-ba02-127bc5d12bf6
+		summarizeBy: sum
+		sourceColumn: lead_time_numerator_days
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column lead_time_denominator_count
+		dataType: double
+		isHidden
+		lineageTag: f7b75d07-1c1f-475c-afba-8708629c6200
+		summarizeBy: sum
+		sourceColumn: lead_time_denominator_count
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column late_purchase_order_count
+		dataType: double
+		isHidden
+		lineageTag: b61bc486-b9c1-4980-861b-400dfef9707a
+		summarizeBy: sum
+		sourceColumn: late_purchase_order_count
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column observed_lead_time_stddev_days
+		dataType: double
+		isHidden
+		lineageTag: 7fe7043e-7db0-4dcc-a8c6-b2e6e18ab19d
+		summarizeBy: none
+		sourceColumn: observed_lead_time_stddev_days
+
+	partition SupplierServiceMonth = m
+		mode: import
+		source =
+				let
+				    Raw = #"DevTable"("MARTS", "SUPPLIER_MONTHLY"),
+				    Selected = Table.SelectColumns(Raw, {"MONTH_START", "SUPPLIER_KEY", "OTIF_NUMERATOR", "OTIF_DENOMINATOR", "FILL_RATE_NUMERATOR", "FILL_RATE_DENOMINATOR", "LEAD_TIME_NUMERATOR_DAYS", "LEAD_TIME_DENOMINATOR_COUNT", "LATE_PURCHASE_ORDER_COUNT", "OBSERVED_LEAD_TIME_STDDEV_DAYS"}),
+				    Lower = Table.TransformColumnNames(Selected, Text.Lower)
+				in
+				    Lower
+

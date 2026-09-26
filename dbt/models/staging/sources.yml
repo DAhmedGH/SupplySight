@@ -1,0 +1,192 @@
+version: 2
+
+sources:
+  - name: raw
+    description: >-
+      Current-state source entities loaded by the Phase 3 Python ingestion workflow.
+      Source values remain VARCHAR in RAW; ingestion metadata records batch lineage
+      and soft quality classifications. Structural preflight failures never enter RAW.
+    database: SUPPLY_CHAIN_DEV
+    schema: RAW
+    loader: SUPPLY_SIGHT_SYNTHETIC
+    config:
+      loaded_at_field: "_INGESTED_AT"
+      freshness:
+        warn_after: {count: 14, period: day}
+        error_after: {count: 30, period: day}
+    tables:
+      - name: products
+        identifier: PRODUCTS
+        description: One current row per product_id; values mirror products.csv.
+        columns:
+          - {name: PRODUCT_ID, description: Stable product business key.}
+          - {name: SKU, description: Stock keeping unit.}
+          - {name: PRODUCT_NAME, description: Product display name.}
+          - {name: CATEGORY, description: Product category.}
+          - {name: SUBCATEGORY, description: Optional product subcategory.}
+          - {name: UNIT_COST, description: Source unit cost as text.}
+          - {name: LIST_PRICE, description: Source list price as text.}
+          - {name: LAUNCH_DATE, description: ISO launch date.}
+          - {name: ACTIVE_FLAG, description: Boolean text flag.}
+          - {name: REORDER_POINT, description: Whole-unit reorder threshold.}
+          - {name: _INGESTED_AT, description: UTC-aware time the current row was loaded.}
+          - {name: _SOURCE_FILE, description: Source CSV basename.}
+          - {name: _BATCH_ID, description: Ingestion invocation UUID.}
+          - {name: _SOURCE_SYSTEM, description: Ingestion source identifier.}
+          - {name: _ROW_HASH, description: Hash of source business values.}
+          - {name: _QUALITY_STATUS, description: "CLEAN, WARNING, or QUARANTINED classification."}
+          - {name: _QUALITY_ISSUES, description: Array of stable issue codes.}
+      - name: warehouses
+        identifier: WAREHOUSES
+        description: One current row per warehouse_id.
+        columns:
+          - {name: WAREHOUSE_ID, description: Stable warehouse business key.}
+          - {name: WAREHOUSE_NAME, description: Warehouse name.}
+          - {name: REGION, description: Warehouse region.}
+          - {name: COUNTRY, description: Country.}
+          - {name: CAPACITY_UNITS, description: Storage capacity in units.}
+          - {name: _INGESTED_AT, description: Load timestamp used for source freshness.}
+          - {name: _SOURCE_FILE, description: Source CSV basename.}
+          - {name: _BATCH_ID, description: Ingestion invocation UUID.}
+          - {name: _SOURCE_SYSTEM, description: Ingestion source identifier.}
+          - {name: _ROW_HASH, description: Hash of source business values.}
+          - {name: _QUALITY_STATUS, description: "CLEAN, WARNING, or QUARANTINED classification."}
+          - {name: _QUALITY_ISSUES, description: Array of stable issue codes.}
+      - name: suppliers
+        identifier: SUPPLIERS
+        description: One current row per supplier_id.
+        columns:
+          - {name: SUPPLIER_ID, description: Stable supplier business key.}
+          - {name: SUPPLIER_NAME, description: Supplier name.}
+          - {name: REGION, description: Supplier region.}
+          - {name: COUNTRY, description: Country.}
+          - {name: LEAD_TIME_DAYS, description: Typical lead time in days.}
+          - {name: LEAD_TIME_STD_DAYS, description: Lead-time standard deviation in days.}
+          - {name: ON_TIME_RATE, description: Historical on-time rate.}
+          - {name: QUALITY_RATE, description: Supplier quality rate.}
+          - {name: COST_FACTOR, description: Relative supplier cost factor.}
+          - {name: ACTIVE_FLAG, description: Boolean text flag.}
+          - {name: _INGESTED_AT, description: Load timestamp used for source freshness.}
+          - {name: _SOURCE_FILE, description: Source CSV basename.}
+          - {name: _BATCH_ID, description: Ingestion invocation UUID.}
+          - {name: _SOURCE_SYSTEM, description: Ingestion source identifier.}
+          - {name: _ROW_HASH, description: Hash of source business values.}
+          - {name: _QUALITY_STATUS, description: "CLEAN, WARNING, or QUARANTINED classification."}
+          - {name: _QUALITY_ISSUES, description: Array of stable issue codes.}
+      - name: customers
+        identifier: CUSTOMERS
+        description: One current row per customer_id.
+        columns:
+          - {name: CUSTOMER_ID, description: Stable customer business key.}
+          - {name: CUSTOMER_SEGMENT, description: Customer segment.}
+          - {name: REGION, description: Customer region; normalized to uppercase in staging.}
+          - {name: COUNTRY, description: Country.}
+          - {name: SIGNUP_DATE, description: ISO signup date.}
+          - {name: _INGESTED_AT, description: Load timestamp used for source freshness.}
+          - {name: _SOURCE_FILE, description: Source CSV basename.}
+          - {name: _BATCH_ID, description: Ingestion invocation UUID.}
+          - {name: _SOURCE_SYSTEM, description: Ingestion source identifier.}
+          - {name: _ROW_HASH, description: Hash of source business values.}
+          - {name: _QUALITY_STATUS, description: "CLEAN, WARNING, or QUARANTINED classification."}
+          - {name: _QUALITY_ISSUES, description: Array of stable issue codes.}
+      - name: orders
+        identifier: ORDERS
+        description: One order line per order_line_id.
+        columns:
+          - {name: ORDER_ID, description: Parent order identifier.}
+          - {name: ORDER_LINE_ID, description: Stable order-line business key.}
+          - {name: ORDER_DATE, description: ISO order date.}
+          - {name: CUSTOMER_ID, description: Customer foreign key.}
+          - {name: PRODUCT_ID, description: Product foreign key.}
+          - {name: WAREHOUSE_ID, description: Warehouse foreign key.}
+          - {name: QUANTITY, description: Ordered whole-unit quantity.}
+          - {name: UNIT_PRICE, description: Source unit price as text.}
+          - {name: DISCOUNT_PCT, description: Discount fraction; out-of-range values are quarantined.}
+          - {name: STATUS, description: Order-line status.}
+          - {name: PROMISED_DELIVERY_DATE, description: ISO promised delivery date.}
+          - {name: _INGESTED_AT, description: Load timestamp used for source freshness.}
+          - {name: _SOURCE_FILE, description: Source CSV basename.}
+          - {name: _BATCH_ID, description: Ingestion invocation UUID.}
+          - {name: _SOURCE_SYSTEM, description: Ingestion source identifier.}
+          - {name: _ROW_HASH, description: Hash of source business values.}
+          - {name: _QUALITY_STATUS, description: "CLEAN, WARNING, or QUARANTINED classification."}
+          - {name: _QUALITY_ISSUES, description: Array of stable issue codes.}
+      - name: inventory_snapshots
+        identifier: INVENTORY_SNAPSHOTS
+        description: One product and warehouse inventory position per snapshot_date.
+        columns:
+          - {name: SNAPSHOT_DATE, description: ISO inventory snapshot date.}
+          - {name: WAREHOUSE_ID, description: Warehouse foreign key.}
+          - {name: PRODUCT_ID, description: Product foreign key.}
+          - {name: ON_HAND_UNITS, description: On-hand whole units.}
+          - {name: RESERVED_UNITS, description: Reserved whole units.}
+          - {name: AVAILABLE_UNITS, description: Available whole units; balance mismatches are quarantined.}
+          - {name: IN_TRANSIT_UNITS, description: In-transit whole units.}
+          - {name: INVENTORY_VALUE, description: Source inventory value as text.}
+          - {name: _INGESTED_AT, description: Load timestamp used for source freshness.}
+          - {name: _SOURCE_FILE, description: Source CSV basename.}
+          - {name: _BATCH_ID, description: Ingestion invocation UUID.}
+          - {name: _SOURCE_SYSTEM, description: Ingestion source identifier.}
+          - {name: _ROW_HASH, description: Hash of source business values.}
+          - {name: _QUALITY_STATUS, description: "CLEAN, WARNING, or QUARANTINED classification."}
+          - {name: _QUALITY_ISSUES, description: Array of stable issue codes.}
+      - name: purchase_orders
+        identifier: PURCHASE_ORDERS
+        description: One purchase order line per po_line_id.
+        columns:
+          - {name: PURCHASE_ORDER_ID, description: Parent purchase order identifier.}
+          - {name: PO_LINE_ID, description: Stable purchase-order-line business key.}
+          - {name: SUPPLIER_ID, description: Supplier foreign key.}
+          - {name: WAREHOUSE_ID, description: Destination warehouse foreign key.}
+          - {name: PRODUCT_ID, description: Product foreign key.}
+          - {name: ORDER_DATE, description: ISO order date.}
+          - {name: EXPECTED_DELIVERY_DATE, description: ISO expected delivery date.}
+          - {name: RECEIVED_DATE, description: ISO receipt date, nullable before receipt.}
+          - {name: ORDERED_QUANTITY, description: Ordered whole units.}
+          - {name: RECEIVED_QUANTITY, description: Received whole units.}
+          - {name: UNIT_COST, description: Source unit cost as text.}
+          - {name: STATUS, description: Purchase-order status.}
+          - {name: _INGESTED_AT, description: Load timestamp used for source freshness.}
+          - {name: _SOURCE_FILE, description: Source CSV basename.}
+          - {name: _BATCH_ID, description: Ingestion invocation UUID.}
+          - {name: _SOURCE_SYSTEM, description: Ingestion source identifier.}
+          - {name: _ROW_HASH, description: Hash of source business values.}
+          - {name: _QUALITY_STATUS, description: "CLEAN, WARNING, or QUARANTINED classification."}
+          - {name: _QUALITY_ISSUES, description: Array of stable issue codes.}
+      - name: shipments
+        identifier: SHIPMENTS
+        description: One shipment record per shipment_id.
+        columns:
+          - {name: SHIPMENT_ID, description: Stable shipment business key.}
+          - {name: ORDER_LINE_ID, description: Order-line foreign key.}
+          - {name: WAREHOUSE_ID, description: Warehouse foreign key.}
+          - {name: SHIP_DATE, description: ISO ship date.}
+          - {name: DELIVERY_DATE, description: ISO delivery date; may be blank for quarantined delivered rows.}
+          - {name: SHIPPED_QUANTITY, description: Shipped whole units.}
+          - {name: SHIPMENT_STATUS, description: Shipment state.}
+          - {name: CARRIER, description: Carrier name.}
+          - {name: _INGESTED_AT, description: Load timestamp used for source freshness.}
+          - {name: _SOURCE_FILE, description: Source CSV basename.}
+          - {name: _BATCH_ID, description: Ingestion invocation UUID.}
+          - {name: _SOURCE_SYSTEM, description: Ingestion source identifier.}
+          - {name: _ROW_HASH, description: Hash of source business values.}
+          - {name: _QUALITY_STATUS, description: "CLEAN, WARNING, or QUARANTINED classification."}
+          - {name: _QUALITY_ISSUES, description: Array of stable issue codes.}
+      - name: returns
+        identifier: RETURNS
+        description: One return event per return_id.
+        columns:
+          - {name: RETURN_ID, description: Stable return business key.}
+          - {name: ORDER_LINE_ID, description: Order-line foreign key.}
+          - {name: RETURN_DATE, description: ISO return date.}
+          - {name: QUANTITY, description: Returned whole units.}
+          - {name: REASON, description: Return reason.}
+          - {name: DISPOSITION, description: Inventory disposition.}
+          - {name: REFUND_AMOUNT, description: Refund amount as text.}
+          - {name: _INGESTED_AT, description: Load timestamp used for source freshness.}
+          - {name: _SOURCE_FILE, description: Source CSV basename.}
+          - {name: _BATCH_ID, description: Ingestion invocation UUID.}
+          - {name: _SOURCE_SYSTEM, description: Ingestion source identifier.}
+          - {name: _ROW_HASH, description: Hash of source business values.}
+          - {name: _QUALITY_STATUS, description: "CLEAN, WARNING, or QUARANTINED classification."}
+          - {name: _QUALITY_ISSUES, description: Array of stable issue codes.}

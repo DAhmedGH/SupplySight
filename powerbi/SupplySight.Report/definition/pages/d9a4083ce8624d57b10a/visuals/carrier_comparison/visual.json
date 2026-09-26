@@ -1,0 +1,135 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "carrier_comparison",
+  "position": {
+    "x": 40,
+    "y": 760,
+    "z": 0,
+    "height": 240,
+    "width": 840,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "pivotTable",
+    "query": {
+      "queryState": {
+        "Rows": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Carrier"
+                    }
+                  },
+                  "Property": "carrier_name"
+                }
+              },
+              "queryRef": "Carrier.carrier_name",
+              "nativeQueryRef": "carrier_name",
+              "active": true,
+              "displayName": "Carrier"
+            }
+          ]
+        },
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Shipment Count"
+                }
+              },
+              "queryRef": "Report Measures.Shipment Count",
+              "nativeQueryRef": "Shipment Count"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Shipped Units"
+                }
+              },
+              "queryRef": "Report Measures.Shipped Units",
+              "nativeQueryRef": "Shipped Units"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Completion %"
+                }
+              },
+              "queryRef": "Report Measures.Completion %",
+              "nativeQueryRef": "Completion %"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "On-time Delivery %"
+                }
+              },
+              "queryRef": "Report Measures.On-time Delivery %",
+              "nativeQueryRef": "On-time Delivery %"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Average Transit Days"
+                }
+              },
+              "queryRef": "Report Measures.Average Transit Days",
+              "nativeQueryRef": "Average Transit Days"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Carrier Performance'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

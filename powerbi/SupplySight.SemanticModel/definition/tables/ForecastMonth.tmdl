@@ -1,0 +1,95 @@
+table ForecastMonth
+	lineageTag: 8a4980bc-830e-4ca2-a95c-a63ee3f45de8
+
+	column run_id
+		dataType: string
+		isHidden
+		lineageTag: 61bcd5bb-2e02-4c75-ab74-2f97bfcbb0fb
+		summarizeBy: none
+		sourceColumn: run_id
+
+	column forecast_date
+		dataType: dateTime
+		isHidden
+		formatString: Long Date
+		lineageTag: 3de8cac4-597b-4fc2-80b9-4f678678ebe2
+		summarizeBy: none
+		sourceColumn: forecast_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column product_id
+		dataType: string
+		isHidden
+		lineageTag: fb6564f0-f7ac-4e65-a723-531fce9bf59b
+		summarizeBy: none
+		sourceColumn: product_id
+
+	column warehouse_key
+		dataType: string
+		isHidden
+		lineageTag: f28d7d8a-0155-40fc-8c4f-b9beddcd7d5c
+		summarizeBy: none
+		sourceColumn: warehouse_key
+
+	column predicted_demand
+		dataType: double
+		isHidden
+		lineageTag: d14c2dfc-a7ac-40ad-9365-91d76a76d6f0
+		summarizeBy: none
+		sourceColumn: predicted_demand
+
+	column lower_bound
+		dataType: double
+		isHidden
+		lineageTag: 53592245-f640-4f75-b25b-197d127463d3
+		summarizeBy: none
+		sourceColumn: lower_bound
+
+	column upper_bound
+		dataType: double
+		isHidden
+		lineageTag: 17cbfbda-c269-4243-858f-3de72faf7c6d
+		summarizeBy: none
+		sourceColumn: upper_bound
+
+	column model_name
+		dataType: string
+		lineageTag: 9ceb671f-79f8-4dd6-aac6-094d33a515d3
+		summarizeBy: none
+		sourceColumn: model_name
+
+	column fallback_reason
+		dataType: string
+		lineageTag: cea4c99f-ae0c-4921-9862-77e4e3f173b0
+		summarizeBy: none
+		sourceColumn: fallback_reason
+
+	column uncertainty_method
+		dataType: string
+		lineageTag: 7289820b-58df-4008-95cc-71341b0b932f
+		summarizeBy: none
+		sourceColumn: uncertainty_method
+
+	column residual_sample_count
+		dataType: double
+		lineageTag: 48b45b3f-68db-4333-83a3-d74080d3ab70
+		summarizeBy: sum
+		sourceColumn: residual_sample_count
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition ForecastMonth = m
+		mode: import
+		source =
+				let
+				    RunId = #"ScenarioRunId",
+				    Raw = #"DevTable"("FORECASTING", "CURRENT_FORECASTS"),
+				    Filtered = Table.SelectRows(Raw, each [RUN_ID] = RunId),
+				    Selected = Table.SelectColumns(Filtered, {"RUN_ID", "FORECAST_DATE", "PRODUCT_ID", "WAREHOUSE_KEY", "PREDICTED_DEMAND", "LOWER_BOUND", "UPPER_BOUND", "MODEL_NAME", "FALLBACK_REASON", "UNCERTAINTY_METHOD", "RESIDUAL_SAMPLE_COUNT"}),
+				    Result = Table.TransformColumnNames(Selected, Text.Lower)
+				in
+				    Result
+

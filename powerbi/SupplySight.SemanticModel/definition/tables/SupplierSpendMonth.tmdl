@@ -1,0 +1,37 @@
+table SupplierSpendMonth
+	lineageTag: 4800208c-a15a-4203-887f-673270ad68ee
+
+	column month_start
+		dataType: dateTime
+		isHidden
+		formatString: Long Date
+		lineageTag: 64258103-58f4-4ce0-ad11-00c30d3b18dd
+		summarizeBy: none
+		sourceColumn: month_start
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column supplier_key
+		dataType: string
+		isHidden
+		lineageTag: bfd2a77d-bd4a-41b6-8dd8-cd39a8cf4dad
+		summarizeBy: none
+		sourceColumn: supplier_key
+
+	column supplier_spend
+		dataType: double
+		isHidden
+		lineageTag: 6739090b-7391-4701-841d-68af2ccfa193
+		summarizeBy: none
+		sourceColumn: supplier_spend
+
+	partition SupplierSpendMonth = m
+		mode: import
+		source =
+				let
+				    Raw = #"DevTable"("MARTS", "SUPPLIER_MONTHLY"),
+				    Selected = Table.SelectColumns(Raw, {"MONTH_START", "SUPPLIER_KEY", "SUPPLIER_SPEND"}),
+				    Lower = Table.TransformColumnNames(Selected, Text.Lower)
+				in
+				    Lower
+

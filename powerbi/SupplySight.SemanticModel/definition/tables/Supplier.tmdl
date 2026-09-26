@@ -1,0 +1,38 @@
+table Supplier
+	lineageTag: 05b69e1d-4d61-4ec8-a4c8-e4879f015760
+
+	column supplier_key
+		dataType: string
+		isHidden
+		lineageTag: c13c5640-5aa7-4b19-bdf4-9a39d641ac13
+		summarizeBy: none
+		sourceColumn: supplier_key
+
+	column supplier_name
+		dataType: string
+		lineageTag: 55799f8a-d214-4c0e-9f78-346e007c09da
+		summarizeBy: none
+		sourceColumn: supplier_name
+
+	column region
+		dataType: string
+		lineageTag: 8ff85ff1-d55a-42e1-96d7-f7d3294d773b
+		summarizeBy: none
+		sourceColumn: region
+
+	column country
+		dataType: string
+		lineageTag: ba894f27-51b0-4707-aa3d-123bb41516cd
+		summarizeBy: none
+		sourceColumn: country
+
+	partition Supplier = m
+		mode: import
+		source =
+				let
+				    Raw = #"DevTable"("CORE", "DIM_SUPPLIER"),
+				    Selected = Table.SelectColumns(Raw, {"SUPPLIER_KEY", "SUPPLIER_NAME", "REGION", "COUNTRY"}),
+				    Lower = Table.TransformColumnNames(Selected, Text.Lower)
+				in
+				    Lower
+

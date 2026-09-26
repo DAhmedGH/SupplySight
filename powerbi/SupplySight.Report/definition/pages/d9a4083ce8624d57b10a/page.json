@@ -1,0 +1,66 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "d9a4083ce8624d57b10a",
+  "displayName": "Supplier & Logistics",
+  "displayOption": "FitToPage",
+  "height": 1080,
+  "width": 1920,
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "Actual months 2024",
+        "displayName": "Actual period | 2024",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "CalendarMonth"
+              }
+            },
+            "Property": "month_start"
+          }
+        },
+        "type": "Range",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "cm",
+              "Entity": "CalendarMonth",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "Between": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Source": "cm"
+                        }
+                      },
+                      "Property": "month_start"
+                    }
+                  },
+                  "LowerBound": {
+                    "Literal": {
+                      "Value": "datetime'2024-01-01T00:00:00.000000'"
+                    }
+                  },
+                  "UpperBound": {
+                    "Literal": {
+                      "Value": "datetime'2024-12-01T00:00:00.000000'"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "howCreated": "User"
+      }
+    ]
+  }
+}

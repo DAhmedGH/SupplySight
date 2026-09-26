@@ -1,0 +1,107 @@
+table InventoryMonth
+	lineageTag: e3a3ca4c-c283-497a-8885-009aced41ce8
+
+	column month_start
+		dataType: dateTime
+		isHidden
+		formatString: Long Date
+		lineageTag: dfc3084f-2863-45c4-b90a-87a1c0308eda
+		summarizeBy: none
+		sourceColumn: month_start
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column product_id
+		dataType: string
+		isHidden
+		lineageTag: 09c471e4-f40c-46fe-aa94-150037cb41ec
+		summarizeBy: none
+		sourceColumn: product_id
+
+	column warehouse_key
+		dataType: string
+		isHidden
+		lineageTag: 5da825ad-c465-4c5d-9985-2f1f2149ed9c
+		summarizeBy: none
+		sourceColumn: warehouse_key
+
+	column month_end_inventory_value
+		dataType: double
+		isHidden
+		lineageTag: e2040661-4ea4-412f-9a0b-2378bb34470a
+		summarizeBy: none
+		sourceColumn: month_end_inventory_value
+
+	column avg_inventory_value
+		dataType: double
+		isHidden
+		lineageTag: ee38dfc4-f758-4c27-8a5a-450f2569dd3c
+		summarizeBy: none
+		sourceColumn: avg_inventory_value
+
+	column inventory_turnover_numerator
+		dataType: double
+		isHidden
+		lineageTag: dbecc4e9-c61f-43ea-9fe3-c0a74fbe74b1
+		summarizeBy: none
+		sourceColumn: inventory_turnover_numerator
+
+	column inventory_turnover_denominator
+		dataType: double
+		isHidden
+		lineageTag: ac888219-5908-4201-8982-d71b02b62e3c
+		summarizeBy: none
+		sourceColumn: inventory_turnover_denominator
+
+	column avg_available_units
+		dataType: double
+		isHidden
+		lineageTag: b382c370-7e93-4ea9-9cd5-b9f66344fab8
+		summarizeBy: none
+		sourceColumn: avg_available_units
+
+	column demand_units_trailing_90d
+		dataType: double
+		isHidden
+		lineageTag: 660f6c32-cc76-4389-8c2e-193cddcfe844
+		summarizeBy: none
+		sourceColumn: demand_units_trailing_90d
+
+	column month_end_excess_units
+		dataType: double
+		isHidden
+		lineageTag: 10ac53cb-35d5-4302-8d6b-8635bb3a8f5a
+		summarizeBy: none
+		sourceColumn: month_end_excess_units
+
+	column month_end_excess_value
+		dataType: double
+		isHidden
+		lineageTag: de2f0a39-2270-42a7-8ab9-23baa0e76e49
+		summarizeBy: none
+		sourceColumn: month_end_excess_value
+
+	column dead_stock_units
+		dataType: double
+		isHidden
+		lineageTag: 4abcf7be-f28d-4d36-bcde-b3b6dea81a68
+		summarizeBy: none
+		sourceColumn: dead_stock_units
+
+	column dead_stock_value
+		dataType: double
+		isHidden
+		lineageTag: c6e7b99e-7ea2-4d52-b39e-36fe1ed47a1d
+		summarizeBy: none
+		sourceColumn: dead_stock_value
+
+	partition InventoryMonth = m
+		mode: import
+		source =
+				let
+				    Raw = #"DevTable"("MARTS", "INVENTORY_MONTHLY"),
+				    Selected = Table.SelectColumns(Raw, {"MONTH_START", "PRODUCT_ID", "WAREHOUSE_KEY", "MONTH_END_INVENTORY_VALUE", "AVG_INVENTORY_VALUE", "INVENTORY_TURNOVER_NUMERATOR", "INVENTORY_TURNOVER_DENOMINATOR", "AVG_AVAILABLE_UNITS", "DEMAND_UNITS_TRAILING_90D", "MONTH_END_EXCESS_UNITS", "MONTH_END_EXCESS_VALUE", "DEAD_STOCK_UNITS", "DEAD_STOCK_VALUE"}),
+				    Lower = Table.TransformColumnNames(Selected, Text.Lower)
+				in
+				    Lower
+

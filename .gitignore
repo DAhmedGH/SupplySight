@@ -1,0 +1,53 @@
+# Environment / secrets
+.env
+.env.*
+!.env.example
+*.p8
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+build/
+dist/
+*.egg-info/
+.coverage
+htmlcov/
+
+# Logs / runtime output
+logs/
+*.log
+data/generated/
+data/quarantine/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# dbt
+dbt/target/
+dbt/logs/
+dbt_packages/
+dbt/profiles.yml
+dbt/.user.yml
+
+# Airflow
+airflow/logs/
+airflow/airflow.db
+airflow/airflow-webserver.pid
+data/runs/
+
+# Power BI local/cache files
+powerbi/**/.pbi/localSettings.json
+powerbi/**/.pbi/cache.abf
+powerbi/**/.pbi/editorSettings.json
+
+# Local development tooling

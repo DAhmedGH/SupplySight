@@ -1,0 +1,255 @@
+{
+  "position": {
+    "width": 1416,
+    "y": 272,
+    "z": 0,
+    "x": 464,
+    "tabOrder": 0,
+    "height": 330
+  },
+  "name": "position_decisions",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Product"
+                    }
+                  },
+                  "Property": "sku"
+                }
+              },
+              "nativeQueryRef": "sku",
+              "queryRef": "Product.sku",
+              "displayName": "SKU"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Warehouse"
+                    }
+                  },
+                  "Property": "warehouse_name"
+                }
+              },
+              "nativeQueryRef": "warehouse_name",
+              "queryRef": "Warehouse.warehouse_name",
+              "displayName": "Warehouse"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Recommendation"
+                    }
+                  },
+                  "Property": "stockout_risk_tier"
+                }
+              },
+              "nativeQueryRef": "stockout_risk_tier",
+              "queryRef": "Recommendation.stockout_risk_tier",
+              "displayName": "Risk Tier"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Recommendation"
+                    }
+                  },
+                  "Property": "reorder_unavailable_reason"
+                }
+              },
+              "nativeQueryRef": "reorder_unavailable_reason",
+              "queryRef": "Recommendation.reorder_unavailable_reason",
+              "displayName": "Reorder Unavailable Reason"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Recommendation"
+                    }
+                  },
+                  "Property": "available_units"
+                }
+              },
+              "nativeQueryRef": "available_units",
+              "queryRef": "Recommendation.available_units",
+              "displayName": "Available Units"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Recommendation"
+                    }
+                  },
+                  "Property": "first_expected_shortage_date"
+                }
+              },
+              "nativeQueryRef": "first_expected_shortage_date",
+              "queryRef": "Recommendation.first_expected_shortage_date",
+              "displayName": "First Expected Shortage Date"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Recommendation"
+                    }
+                  },
+                  "Property": "first_stressed_shortage_date"
+                }
+              },
+              "nativeQueryRef": "first_stressed_shortage_date",
+              "queryRef": "Recommendation.first_stressed_shortage_date",
+              "displayName": "First Stressed Shortage Date"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Recommendation"
+                    }
+                  },
+                  "Property": "immediate_mitigation_flag"
+                }
+              },
+              "nativeQueryRef": "immediate_mitigation_flag",
+              "queryRef": "Recommendation.immediate_mitigation_flag",
+              "displayName": "Immediate Mitigation Flag"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Recommendation"
+                    }
+                  },
+                  "Property": "selected_supplier_id"
+                }
+              },
+              "nativeQueryRef": "selected_supplier_id",
+              "queryRef": "Recommendation.selected_supplier_id",
+              "displayName": "Selected Supplier ID"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Expected Shortage Units"
+                }
+              },
+              "nativeQueryRef": "Expected Shortage Units",
+              "queryRef": "Report Measures.Expected Shortage Units",
+              "displayName": "Expected shortage units"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Stressed Shortage Units"
+                }
+              },
+              "nativeQueryRef": "Stressed Shortage Units",
+              "queryRef": "Report Measures.Stressed Shortage Units",
+              "displayName": "Stressed shortage units"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Suggested Reorder Units"
+                }
+              },
+              "nativeQueryRef": "Suggested Reorder Units",
+              "queryRef": "Report Measures.Suggested Reorder Units",
+              "displayName": "Suggested reorder units"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Potential Revenue Exposure"
+                }
+              },
+              "nativeQueryRef": "Potential Revenue Exposure",
+              "queryRef": "Report Measures.Potential Revenue Exposure",
+              "displayName": "Potential revenue exposure"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "columnHeaders": [
+        {
+          "properties": {
+            "columnAdjustment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'growToFit'"
+                }
+              }
+            },
+            "autoSizeColumnWidth": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

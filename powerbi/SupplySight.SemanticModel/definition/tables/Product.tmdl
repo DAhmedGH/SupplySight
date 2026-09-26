@@ -1,0 +1,67 @@
+table Product
+	lineageTag: 2ff27648-0fa8-4ff9-8e7d-e78d6508b4f7
+
+	column product_id
+		dataType: string
+		isHidden
+		lineageTag: 03618149-bed8-41d0-91e8-0a726f1a37a4
+		summarizeBy: none
+		sourceColumn: product_id
+
+	column sku
+		dataType: string
+		lineageTag: 869dd531-47ca-426a-821d-3dfb7ba05399
+		summarizeBy: none
+		sourceColumn: sku
+
+	column product_name
+		dataType: string
+		lineageTag: e97e3744-1984-4407-b5bc-96bcda03fd24
+		summarizeBy: none
+		sourceColumn: product_name
+
+	column category
+		dataType: string
+		lineageTag: abce35f5-4922-433a-88d2-a9f63567c9a0
+		summarizeBy: none
+		sourceColumn: category
+
+	column subcategory
+		dataType: string
+		lineageTag: a0941695-57de-4328-8217-355443fc394b
+		summarizeBy: none
+		sourceColumn: subcategory
+
+	column category_display
+		dataType: string
+		lineageTag: a336b141-c995-4cb2-a84a-1bb1f08cbe58
+		summarizeBy: none
+		sourceColumn: category_display
+
+	hierarchy 'Category to SKU'
+		lineageTag: 2a0714c4-03a2-4d0f-8e82-ab69b619059d
+
+		level Category
+			lineageTag: 02bf9524-2d38-446f-b96a-1675930d8c4f
+			column: category
+
+		level Subcategory
+			lineageTag: 2f4a7040-77d9-4931-91da-5c32f89ccf85
+			column: subcategory
+
+		level SKU
+			lineageTag: 60c58992-129a-43e4-9f38-d460bacc26ca
+			column: sku
+
+	partition Product = m
+		mode: import
+		source =
+				let
+				    Raw = #"DevTable"("CORE", "DIM_PRODUCT"),
+				    Current = Table.SelectRows(Raw, each [IS_CURRENT] = true),
+				    Selected = Table.SelectColumns(Current, {"PRODUCT_ID", "SKU", "PRODUCT_NAME", "CATEGORY", "SUBCATEGORY"}),
+				    Renamed = Table.TransformColumnNames(Selected, Text.Lower),
+				    Result = Table.AddColumn(Renamed, "category_display", each Text.Proper([category], "en-US"), type text)
+				in
+				    Result
+

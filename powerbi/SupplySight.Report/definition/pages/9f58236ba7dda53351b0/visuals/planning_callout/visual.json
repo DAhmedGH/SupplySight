@@ -1,0 +1,51 @@
+{
+  "position": {
+    "width": 600,
+    "y": 278,
+    "z": 0,
+    "x": 40,
+    "tabOrder": 0,
+    "height": 112
+  },
+  "name": "planning_callout",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Critical / High Positions"
+                }
+              },
+              "nativeQueryRef": "Critical / High Positions",
+              "queryRef": "Report Measures.Critical / High Positions"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Potential Revenue Exposure"
+                }
+              },
+              "nativeQueryRef": "Potential Revenue Exposure",
+              "queryRef": "Report Measures.Potential Revenue Exposure"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

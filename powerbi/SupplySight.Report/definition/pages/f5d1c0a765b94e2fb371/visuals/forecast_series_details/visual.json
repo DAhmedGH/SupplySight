@@ -1,0 +1,194 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "forecast_series_details",
+  "position": {
+    "x": 1320,
+    "y": 816,
+    "z": 0,
+    "height": 184,
+    "width": 560,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ForecastMonth"
+                    }
+                  },
+                  "Property": "forecast_date"
+                }
+              },
+              "queryRef": "ForecastMonth.forecast_date",
+              "nativeQueryRef": "forecast_date",
+              "displayName": "Forecast Date"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ForecastMonth"
+                    }
+                  },
+                  "Property": "model_name"
+                }
+              },
+              "queryRef": "ForecastMonth.model_name",
+              "nativeQueryRef": "model_name",
+              "displayName": "Model"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ForecastMonth"
+                    }
+                  },
+                  "Property": "fallback_reason"
+                }
+              },
+              "queryRef": "ForecastMonth.fallback_reason",
+              "nativeQueryRef": "fallback_reason",
+              "displayName": "Fallback Reason"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ForecastMonth"
+                    }
+                  },
+                  "Property": "uncertainty_method"
+                }
+              },
+              "queryRef": "ForecastMonth.uncertainty_method",
+              "nativeQueryRef": "uncertainty_method",
+              "displayName": "Band Method"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ForecastMonth"
+                    }
+                  },
+                  "Property": "residual_sample_count"
+                }
+              },
+              "queryRef": "ForecastMonth.residual_sample_count",
+              "nativeQueryRef": "residual_sample_count",
+              "displayName": "Residual Sample Count"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Forecast Details'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "c61a8ad664b02c1016c3",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "ForecastMonth"
+              }
+            },
+            "Property": "forecast_date"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "306b88e01c650240ab06",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "ForecastMonth"
+              }
+            },
+            "Property": "model_name"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "8a4ce329953003560148",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "ForecastMonth"
+              }
+            },
+            "Property": "fallback_reason"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "c28d0cd8774c6bdd0b1e",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "ForecastMonth"
+              }
+            },
+            "Property": "uncertainty_method"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "334ac7b23e0e9395e8a0",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "ForecastMonth"
+              }
+            },
+            "Property": "residual_sample_count"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
+  }
+}

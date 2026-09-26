@@ -1,0 +1,86 @@
+table CalendarMonth
+	lineageTag: b1ea82ee-bfae-4ab6-8594-9efc494eb9cc
+
+	column month_start
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 8789b2df-e4df-4627-bfb7-5a7c6d75345a
+		summarizeBy: none
+		sourceColumn: month_start
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column month_label
+		dataType: string
+		lineageTag: 299d42e2-482e-4d07-8ccb-92b9a858de84
+		summarizeBy: none
+		sourceColumn: month_label
+		sortByColumn: month_index
+
+	column year_number
+		dataType: double
+		lineageTag: 5e5953da-68ca-46b7-9845-8a73ca0eddf6
+		summarizeBy: sum
+		sourceColumn: year_number
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column quarter_number
+		dataType: double
+		lineageTag: 573b99c6-ca1d-438d-a4a8-1938e579a837
+		summarizeBy: sum
+		sourceColumn: quarter_number
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column month_number
+		dataType: double
+		isHidden
+		lineageTag: 674563b4-4bea-4fd8-967d-2d8a89490a07
+		summarizeBy: sum
+		sourceColumn: month_number
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column month_index
+		dataType: int64
+		isHidden
+		lineageTag: 083955c6-c4a2-48ac-927b-b08a144a9cee
+		summarizeBy: none
+		sourceColumn: month_index
+
+	hierarchy 'Reporting Month'
+		lineageTag: a5d9f641-fa09-48e7-9b89-78c284acaafa
+
+		level Year
+			lineageTag: 1c8aca1a-8d7c-43f4-80a9-db72b2a859be
+			column: year_number
+
+		level Quarter
+			lineageTag: f0ff5c6f-6006-48c2-8a19-974b90358213
+			column: quarter_number
+
+		level Month
+			lineageTag: 1ca2018c-185a-4cc7-9bbf-35c44600e0a3
+			column: month_label
+
+	partition CalendarMonth = m
+		mode: import
+		source =
+				let
+				    Raw = #"DevTable"("CORE", "DIM_DATE"),
+				    FirstDays = Table.SelectRows(Raw, each [DAY_OF_MONTH] = 1 and Date.From([DATE_DAY]) >= #date(2024, 1, 1) and Date.From([DATE_DAY]) <= #date(2025, 3, 1)),
+				    Selected = Table.SelectColumns(FirstDays, {"DATE_DAY", "YEAR_NUMBER", "QUARTER_NUMBER", "MONTH_NUMBER"}),
+				    Lower = Table.TransformColumnNames(Selected, Text.Lower),
+				    Renamed = Table.RenameColumns(Lower, {{"date_day", "month_start"}}),
+				    WithLabel = Table.AddColumn(Renamed, "month_label", each Date.ToText(Date.From([month_start]), "MMM yyyy", "en-US"), type text),
+				    Result = Table.AddColumn(WithLabel, "month_index", each [year_number] * 12 + [month_number], Int64.Type)
+				in
+				    Result
+

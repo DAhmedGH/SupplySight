@@ -1,0 +1,210 @@
+version: 2
+
+models:
+  - name: stg_products
+    description: >-
+      Typed, normalized current product rows. Retains warnings and quarantined
+      records from RAW; no business-rule repair is applied. Grain is product_id.
+    tests:
+      - no_unexpected_nulls: {arguments: {required_columns: [sku, product_name, category, unit_cost, list_price, launch_date, active_flag, reorder_point]}}
+      - source_stage_reconciliation: {arguments: {source_name: raw, source_table: products, key_columns: [product_id]}}
+    columns:
+      - {name: product_id, description: Product business key., tests: [not_null, unique]}
+      - {name: sku, description: Trimmed stock keeping unit., tests: [not_null]}
+      - {name: product_name, description: Trimmed product name., tests: [not_null]}
+      - {name: category, description: Lowercase category label., tests: [not_null]}
+      - {name: subcategory, description: Optional trimmed subcategory; missing optional values remain null.}
+      - {name: unit_cost, description: "Safely parsed source unit cost as NUMBER(38,18)."}
+      - {name: list_price, description: "Safely parsed list price as NUMBER(38,18)."}
+      - {name: launch_date, description: Safely parsed launch date.}
+      - {name: active_flag, description: Safely parsed boolean source flag.}
+      - {name: reorder_point, description: Safely parsed whole-unit reorder threshold.}
+      - {name: ingested_at, description: RAW ingestion timestamp.}
+      - {name: source_file, description: RAW source file name.}
+      - {name: batch_id, description: RAW ingestion batch UUID.}
+      - {name: source_system, description: RAW source system identifier.}
+      - {name: row_hash, description: RAW source-value hash.}
+      - {name: quality_status, description: Uppercase RAW quality classification., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING, QUARANTINED]}}}]}
+      - {name: quality_issues, description: RAW issue-code array, preserved without filtering.}
+      - {name: is_quarantined, description: True when RAW quality_status is QUARANTINED.}
+  - name: stg_warehouses
+    description: >-
+      Typed current warehouse rows with uppercased region and country. Grain is
+      warehouse_id; quality metadata from RAW is retained.
+    tests:
+      - no_unexpected_nulls: {arguments: {required_columns: [warehouse_name, region, country, capacity_units]}}
+      - source_stage_reconciliation: {arguments: {source_name: raw, source_table: warehouses, key_columns: [warehouse_id]}}
+    columns:
+      - {name: warehouse_id, description: Warehouse business key., tests: [not_null, unique]}
+      - {name: warehouse_name, description: Trimmed warehouse name., tests: [not_null]}
+      - {name: region, description: Uppercase warehouse region.}
+      - {name: country, description: Uppercase country code or name.}
+      - {name: capacity_units, description: Safely parsed whole-unit capacity.}
+      - {name: ingested_at, description: RAW ingestion timestamp.}
+      - {name: source_file, description: RAW source file name.}
+      - {name: batch_id, description: RAW ingestion batch UUID.}
+      - {name: source_system, description: RAW source system identifier.}
+      - {name: row_hash, description: RAW source-value hash.}
+      - {name: quality_status, description: Uppercase RAW quality classification., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING, QUARANTINED]}}}]}
+      - {name: quality_issues, description: RAW issue-code array, preserved without filtering.}
+      - {name: is_quarantined, description: True when RAW quality_status is QUARANTINED.}
+  - name: stg_suppliers
+    description: Typed current suppliers with normalized geography and parsed metrics; grain is supplier_id.
+    tests:
+      - no_unexpected_nulls: {arguments: {required_columns: [supplier_name, region, country, lead_time_days, lead_time_std_days, on_time_rate, quality_rate, cost_factor, active_flag]}}
+      - source_stage_reconciliation: {arguments: {source_name: raw, source_table: suppliers, key_columns: [supplier_id]}}
+    columns:
+      - {name: supplier_id, description: Supplier business key., tests: [not_null, unique]}
+      - {name: supplier_name, description: Trimmed supplier name., tests: [not_null]}
+      - {name: region, description: Uppercase supplier region.}
+      - {name: country, description: Uppercase country.}
+      - {name: lead_time_days, description: Safely parsed whole-day lead time.}
+      - {name: lead_time_std_days, description: Safely parsed lead-time standard deviation.}
+      - {name: on_time_rate, description: Safely parsed source on-time rate.}
+      - {name: quality_rate, description: Safely parsed source quality rate.}
+      - {name: cost_factor, description: Safely parsed relative cost factor.}
+      - {name: active_flag, description: Safely parsed boolean source flag.}
+      - {name: ingested_at, description: RAW ingestion timestamp.}
+      - {name: source_file, description: RAW source file name.}
+      - {name: batch_id, description: RAW ingestion batch UUID.}
+      - {name: source_system, description: RAW source system identifier.}
+      - {name: row_hash, description: RAW source-value hash.}
+      - {name: quality_status, description: Uppercase RAW quality classification., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING, QUARANTINED]}}}]}
+      - {name: quality_issues, description: RAW issue-code array, preserved without filtering.}
+      - {name: is_quarantined, description: True when RAW quality_status is QUARANTINED.}
+  - name: stg_customers
+    description: Typed current customers with normalized region; grain is customer_id.
+    tests:
+      - no_unexpected_nulls: {arguments: {required_columns: [customer_segment, region, country, signup_date]}}
+      - source_stage_reconciliation: {arguments: {source_name: raw, source_table: customers, key_columns: [customer_id]}}
+    columns:
+      - {name: customer_id, description: Customer business key., tests: [not_null, unique]}
+      - {name: customer_segment, description: Lowercase customer segment., tests: [not_null]}
+      - {name: region, description: Uppercase region.}
+      - {name: country, description: Uppercase country.}
+      - {name: signup_date, description: Safely parsed signup date.}
+      - {name: ingested_at, description: RAW ingestion timestamp.}
+      - {name: source_file, description: RAW source file name.}
+      - {name: batch_id, description: RAW ingestion batch UUID.}
+      - {name: source_system, description: RAW source system identifier.}
+      - {name: row_hash, description: RAW source-value hash.}
+      - {name: quality_status, description: Uppercase RAW quality classification., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING, QUARANTINED]}}}]}
+      - {name: quality_issues, description: RAW issue-code array, preserved without filtering.}
+      - {name: is_quarantined, description: True when RAW quality_status is QUARANTINED.}
+  - name: stg_orders
+    description: Typed order-line source rows; grain is order_line_id and raw soft-quality rows remain visible.
+    tests:
+      - no_unexpected_nulls: {arguments: {required_columns: [unit_price, discount_pct, status, promised_delivery_date]}}
+      - source_stage_reconciliation: {arguments: {source_name: raw, source_table: orders, key_columns: [order_line_id]}}
+    columns:
+      - {name: order_id, description: Parent order identifier., tests: [not_null]}
+      - {name: order_line_id, description: Order-line business key., tests: [not_null, unique]}
+      - {name: order_date, description: Safely parsed order date., tests: [not_null]}
+      - {name: customer_id, description: Customer reference., tests: [not_null, {relationships: {arguments: {to: ref('stg_customers'), field: customer_id}}}]}
+      - {name: product_id, description: Product reference., tests: [not_null, {relationships: {arguments: {to: ref('stg_products'), field: product_id}}}]}
+      - {name: warehouse_id, description: Warehouse reference., tests: [not_null, {relationships: {arguments: {to: ref('stg_warehouses'), field: warehouse_id}}}]}
+      - {name: quantity, description: Safely parsed whole-unit quantity., tests: [not_null]}
+      - {name: unit_price, description: Safely parsed unit price.}
+      - {name: discount_pct, description: Safely parsed discount fraction; quarantined out-of-range records retained.}
+      - {name: status, description: Lowercase order-line status., tests: [{accepted_values: {arguments: {values: [delivered, processing, backordered, partially_fulfilled, cancelled]}}}]}
+      - {name: promised_delivery_date, description: Safely parsed promised delivery date.}
+      - {name: ingested_at, description: RAW ingestion timestamp.}
+      - {name: source_file, description: RAW source file name.}
+      - {name: batch_id, description: RAW ingestion batch UUID.}
+      - {name: source_system, description: RAW source system identifier.}
+      - {name: row_hash, description: RAW source-value hash.}
+      - {name: quality_status, description: Uppercase RAW quality classification., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING, QUARANTINED]}}}]}
+      - {name: quality_issues, description: RAW issue-code array, preserved without filtering.}
+      - {name: is_quarantined, description: True when RAW quality_status is QUARANTINED.}
+  - name: stg_inventory_snapshots
+    description: Typed inventory positions; grain is snapshot date, warehouse and product. Quarantined balance issues remain visible.
+    tests:
+      - no_unexpected_nulls: {arguments: {required_columns: [on_hand_units, reserved_units, available_units, in_transit_units, inventory_value]}}
+      - unique_combination_of_columns: {arguments: {combination_of_columns: [snapshot_date, warehouse_id, product_id]}}
+      - source_stage_reconciliation: {arguments: {source_name: raw, source_table: inventory_snapshots, key_columns: [snapshot_date, warehouse_id, product_id]}}
+    columns:
+      - {name: snapshot_date, description: Snapshot business date., tests: [not_null]}
+      - {name: warehouse_id, description: Warehouse part of the grain and foreign key., tests: [not_null, {relationships: {arguments: {to: ref('stg_warehouses'), field: warehouse_id}}}]}
+      - {name: product_id, description: Product part of the grain and foreign key., tests: [not_null, {relationships: {arguments: {to: ref('stg_products'), field: product_id}}}]}
+      - {name: on_hand_units, description: Safely parsed on-hand whole units.}
+      - {name: reserved_units, description: Safely parsed reserved whole units.}
+      - {name: available_units, description: Safely parsed available whole units; source balance defect remains uncorrected.}
+      - {name: in_transit_units, description: Safely parsed in-transit whole units.}
+      - {name: inventory_value, description: Safely parsed source inventory value.}
+      - {name: ingested_at, description: RAW ingestion timestamp.}
+      - {name: source_file, description: RAW source file name.}
+      - {name: batch_id, description: RAW ingestion batch UUID.}
+      - {name: source_system, description: RAW source system identifier.}
+      - {name: row_hash, description: RAW source-value hash.}
+      - {name: quality_status, description: Uppercase RAW quality classification., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING, QUARANTINED]}}}]}
+      - {name: quality_issues, description: RAW issue-code array, preserved without filtering.}
+      - {name: is_quarantined, description: True when RAW quality_status is QUARANTINED.}
+  - name: stg_purchase_orders
+    description: Typed purchase-order lines; grain is po_line_id.
+    tests:
+      - no_unexpected_nulls: {arguments: {required_columns: [expected_delivery_date, ordered_quantity, received_quantity, unit_cost, status]}}
+      - source_stage_reconciliation: {arguments: {source_name: raw, source_table: purchase_orders, key_columns: [po_line_id]}}
+    columns:
+      - {name: purchase_order_id, description: Parent purchase-order identifier., tests: [not_null]}
+      - {name: po_line_id, description: Purchase-order-line business key., tests: [not_null, unique]}
+      - {name: supplier_id, description: Supplier reference., tests: [not_null, {relationships: {arguments: {to: ref('stg_suppliers'), field: supplier_id}}}]}
+      - {name: warehouse_id, description: Destination warehouse reference., tests: [not_null, {relationships: {arguments: {to: ref('stg_warehouses'), field: warehouse_id}}}]}
+      - {name: product_id, description: Product reference., tests: [not_null, {relationships: {arguments: {to: ref('stg_products'), field: product_id}}}]}
+      - {name: order_date, description: Safely parsed order date., tests: [not_null]}
+      - {name: expected_delivery_date, description: Safely parsed expected delivery date.}
+      - {name: received_date, description: Safely parsed optional receipt date.}
+      - {name: ordered_quantity, description: Safely parsed ordered units., tests: [not_null]}
+      - {name: received_quantity, description: Safely parsed received units., tests: [not_null]}
+      - {name: unit_cost, description: Safely parsed unit cost.}
+      - {name: status, description: Lowercase purchase-order state., tests: [{accepted_values: {arguments: {values: [received, in_transit, open]}}}]}
+      - {name: ingested_at, description: RAW ingestion timestamp.}
+      - {name: source_file, description: RAW source file name.}
+      - {name: batch_id, description: RAW ingestion batch UUID.}
+      - {name: source_system, description: RAW source system identifier.}
+      - {name: row_hash, description: RAW source-value hash.}
+      - {name: quality_status, description: Uppercase RAW quality classification., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING, QUARANTINED]}}}]}
+      - {name: quality_issues, description: RAW issue-code array, preserved without filtering.}
+      - {name: is_quarantined, description: True when RAW quality_status is QUARANTINED.}
+  - name: stg_shipments
+    description: Typed shipment records; grain is shipment_id. Missing delivered-row delivery dates remain null and are flagged from RAW.
+    tests:
+      - no_unexpected_nulls: {arguments: {required_columns: [shipped_quantity, shipment_status, carrier]}}
+      - source_stage_reconciliation: {arguments: {source_name: raw, source_table: shipments, key_columns: [shipment_id]}}
+    columns:
+      - {name: shipment_id, description: Shipment business key., tests: [not_null, unique]}
+      - {name: order_line_id, description: Order-line reference., tests: [not_null, {relationships: {arguments: {to: ref('stg_orders'), field: order_line_id}}}]}
+      - {name: warehouse_id, description: Warehouse reference., tests: [not_null, {relationships: {arguments: {to: ref('stg_warehouses'), field: warehouse_id}}}]}
+      - {name: ship_date, description: Safely parsed shipment date., tests: [not_null]}
+      - {name: delivery_date, description: Safely parsed optional delivery date.}
+      - {name: shipped_quantity, description: Safely parsed shipped whole units., tests: [not_null]}
+      - {name: shipment_status, description: Lowercase shipment status., tests: [not_null]}
+      - {name: carrier, description: Trimmed carrier name., tests: [not_null]}
+      - {name: ingested_at, description: RAW ingestion timestamp.}
+      - {name: source_file, description: RAW source file name.}
+      - {name: batch_id, description: RAW ingestion batch UUID.}
+      - {name: source_system, description: RAW source system identifier.}
+      - {name: row_hash, description: RAW source-value hash.}
+      - {name: quality_status, description: Uppercase RAW quality classification., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING, QUARANTINED]}}}]}
+      - {name: quality_issues, description: RAW issue-code array, preserved without filtering.}
+      - {name: is_quarantined, description: True when RAW quality_status is QUARANTINED.}
+  - name: stg_returns
+    description: Typed return events; grain is return_id.
+    tests:
+      - no_unexpected_nulls: {arguments: {required_columns: [quantity, reason, disposition, refund_amount]}}
+      - source_stage_reconciliation: {arguments: {source_name: raw, source_table: returns, key_columns: [return_id]}}
+    columns:
+      - {name: return_id, description: Return business key., tests: [not_null, unique]}
+      - {name: order_line_id, description: Order-line reference., tests: [not_null, {relationships: {arguments: {to: ref('stg_orders'), field: order_line_id}}}]}
+      - {name: return_date, description: Safely parsed return date., tests: [not_null]}
+      - {name: quantity, description: Safely parsed returned whole units., tests: [not_null]}
+      - {name: reason, description: Lowercase return reason., tests: [{accepted_values: {arguments: {values: [damaged, wrong_item, not_as_described, changed_mind, late_delivery]}}}]}
+      - {name: disposition, description: Lowercase return disposition., tests: [{accepted_values: {arguments: {values: [quarantine, refurbish, dispose]}}}]}
+      - {name: refund_amount, description: Safely parsed refund amount.}
+      - {name: ingested_at, description: RAW ingestion timestamp.}
+      - {name: source_file, description: RAW source file name.}
+      - {name: batch_id, description: RAW ingestion batch UUID.}
+      - {name: source_system, description: RAW source system identifier.}
+      - {name: row_hash, description: RAW source-value hash.}
+      - {name: quality_status, description: Uppercase RAW quality classification., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING, QUARANTINED]}}}]}
+      - {name: quality_issues, description: RAW issue-code array, preserved without filtering.}
+      - {name: is_quarantined, description: True when RAW quality_status is QUARANTINED.}

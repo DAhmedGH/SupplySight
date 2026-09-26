@@ -1,0 +1,13 @@
+pandas
+numpy
+requests
+snowflake-connector-python
+sqlalchemy
+pydantic
+pytest
+scikit-learn
+statsmodels
+python-dotenv
+tenacity
+ruff
+dbt-snowflake

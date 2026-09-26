@@ -1,0 +1,90 @@
+table ForecastEvaluation
+	lineageTag: 142cabd6-75e6-4501-b07e-3d5db208aaa5
+
+	column run_id
+		dataType: string
+		isHidden
+		lineageTag: 44b7cf00-fbc4-44f7-b0a1-61139ca607d9
+		summarizeBy: none
+		sourceColumn: run_id
+
+	column product_id
+		dataType: string
+		isHidden
+		lineageTag: 285fda59-2706-4b16-ac6c-95f5b528e4f9
+		summarizeBy: none
+		sourceColumn: product_id
+
+	column warehouse_key
+		dataType: string
+		isHidden
+		lineageTag: 964e0ae8-03a3-4fa4-bf60-c5e29bf5ba98
+		summarizeBy: none
+		sourceColumn: warehouse_key
+
+	column model_name
+		dataType: string
+		isHidden
+		lineageTag: 6f666fdf-381c-4334-b11a-fbd95912a7e1
+		summarizeBy: none
+		sourceColumn: model_name
+
+	column selected_model
+		dataType: string
+		lineageTag: cf4c5a1f-ba60-4306-939e-e6dd4d0b55bf
+		summarizeBy: none
+		sourceColumn: selected_model
+
+	column fallback_used
+		dataType: boolean
+		lineageTag: bd328633-8a07-431d-a1d1-0366b9853faf
+		summarizeBy: none
+		sourceColumn: fallback_used
+
+	column baseline_mae
+		dataType: double
+		isHidden
+		lineageTag: 88503fe2-42f0-4956-968b-e65baefdaad3
+		summarizeBy: none
+		sourceColumn: baseline_mae
+
+	column candidate_mae
+		dataType: double
+		isHidden
+		lineageTag: b3079cfc-6c53-41fc-b86b-ab62366ac15b
+		summarizeBy: none
+		sourceColumn: candidate_mae
+
+	column test_mae
+		dataType: double
+		isHidden
+		lineageTag: 50dcd61e-57ce-4789-8fb5-a226acf1626d
+		summarizeBy: none
+		sourceColumn: test_mae
+
+	column test_rmse
+		dataType: double
+		isHidden
+		lineageTag: 6d41b864-9c5e-45d0-bc2a-b39dd9e209d6
+		summarizeBy: none
+		sourceColumn: test_rmse
+
+	column test_wape
+		dataType: double
+		isHidden
+		lineageTag: 0daf171a-c914-4b94-ada2-b1dca48b1322
+		summarizeBy: none
+		sourceColumn: test_wape
+
+	partition ForecastEvaluation = m
+		mode: import
+		source =
+				let
+				    RunId = #"ScenarioRunId",
+				    Raw = #"DevTable"("FORECASTING", "MODEL_EVALUATION"),
+				    Filtered = Table.SelectRows(Raw, each [RUN_ID] = RunId),
+				    Selected = Table.SelectColumns(Filtered, {"RUN_ID", "PRODUCT_ID", "WAREHOUSE_KEY", "MODEL_NAME", "SELECTED_MODEL", "FALLBACK_USED", "BASELINE_MAE", "CANDIDATE_MAE", "TEST_MAE", "TEST_RMSE", "TEST_WAPE"}),
+				    Result = Table.TransformColumnNames(Selected, Text.Lower)
+				in
+				    Result
+

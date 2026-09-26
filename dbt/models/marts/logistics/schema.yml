@@ -1,0 +1,48 @@
+version: 2
+
+models:
+  - name: shipment_detail
+    description: >-
+      One row per eligible CORE shipment. Timeliness compares delivery_date to
+      promised_delivery_date from an eligible CORE order. Missing or quarantined
+      order context leaves timeliness metrics ineligible and is exposed separately.
+      WARNING shipments remain included; upstream order quality is retained.
+    columns:
+      - {name: shipment_fact_key, description: CORE shipment fact key., tests: [not_null, unique]}
+      - {name: shipment_id, description: Shipment grain and trace key., tests: [not_null, unique]}
+      - {name: order_line_id, description: Associated CORE order-line key., tests: [not_null]}
+      - {name: ship_date_key, description: CORE ship date dimension key., tests: [not_null, {relationships: {arguments: {to: ref('dim_date'), field: date_key}}}]}
+      - {name: customer_key, description: CORE customer key., tests: [not_null, {relationships: {arguments: {to: ref('dim_customer'), field: customer_key}}}]}
+      - {name: warehouse_key, description: CORE warehouse key., tests: [not_null, {relationships: {arguments: {to: ref('dim_warehouse'), field: warehouse_key}}}]}
+      - {name: carrier_key, description: CORE carrier key., tests: [not_null, {relationships: {arguments: {to: ref('dim_carrier'), field: carrier_key}}}]}
+      - {name: product_key, description: CORE product version key., tests: [not_null, {relationships: {arguments: {to: ref('dim_product'), field: product_key}}}]}
+      - {name: shipped_quantity, description: Additive shipped units., tests: [not_null]}
+      - {name: is_completed, description: True when a delivery date is recorded., tests: [not_null]}
+      - {name: transit_days, description: Calendar-day difference from ship date to delivery date; null until delivered.}
+      - {name: is_late, description: True only when completed delivery is later than the eligible order promised date; null when comparison is unavailable.}
+      - {name: timeliness_eligible_count, description: Denominator contribution for on-time rate; completed shipment with eligible promised date.}
+      - {name: on_time_shipment_count, description: Numerator contribution for on-time rate.}
+      - {name: upstream_order_quality_status, description: CORE order quality state, including QUARANTINED context., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING, QUARANTINED]}}}]}
+      - {name: product_history_fallback, description: CORE earliest-observed product version fallback flag., tests: [not_null]}
+      - {name: quality_status, description: CORE shipment quality state; CLEAN and WARNING included., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING]}}}]}
+  - name: logistics_monthly
+    description: >-
+      Monthly shipping aggregate at ship_month, carrier_key, and warehouse_key.
+      On-time rate is on_time_shipment_count / timeliness_eligible_count.
+      Transit variability uses sample standard deviation over completed shipments.
+    tests:
+      - unique_combination_of_columns: {arguments: {combination_of_columns: [ship_month, carrier_key, warehouse_key]}}
+    columns:
+      - {name: ship_month, description: First calendar day of ship month., tests: [not_null]}
+      - {name: carrier_key, description: CORE carrier key., tests: [not_null, {relationships: {arguments: {to: ref('dim_carrier'), field: carrier_key}}}]}
+      - {name: warehouse_key, description: CORE warehouse key., tests: [not_null, {relationships: {arguments: {to: ref('dim_warehouse'), field: warehouse_key}}}]}
+      - {name: shipment_count, description: Count of eligible shipments., tests: [not_null]}
+      - {name: shipped_quantity, description: Additive shipped units., tests: [not_null]}
+      - {name: completed_shipment_count, description: Count of shipments with a delivery date., tests: [not_null]}
+      - {name: timeliness_eligible_count, description: Denominator for on-time rate; completed with eligible promised date., tests: [not_null]}
+      - {name: on_time_shipment_count, description: Numerator for on-time rate., tests: [not_null]}
+      - {name: late_shipment_count, description: Completed shipments later than eligible promised date., tests: [not_null]}
+      - {name: average_transit_days, description: Mean calendar days from ship to delivery among completed shipments.}
+      - {name: transit_days_stddev, description: Sample standard deviation of transit days among completed shipments.}
+      - {name: upstream_quarantined_order_count, description: Shipments retained with quarantined upstream order context.}
+      - {name: product_history_fallback_shipment_count, description: Number of shipments using earliest-observed product version.}

@@ -1,0 +1,89 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "risk_tier_summary",
+  "position": {
+    "x": 40,
+    "y": 272,
+    "z": 0,
+    "height": 320,
+    "width": 400,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "clusteredBarChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Recommendation"
+                    }
+                  },
+                  "Property": "stockout_risk_tier"
+                }
+              },
+              "queryRef": "Recommendation.stockout_risk_tier",
+              "nativeQueryRef": "stockout_risk_tier",
+              "active": true,
+              "displayName": "Risk Tier"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Risk Positions"
+                }
+              },
+              "queryRef": "Report Measures.Risk Positions",
+              "nativeQueryRef": "Risk Positions"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "Recommendation"
+                  }
+                },
+                "Property": "stockout_risk_tier"
+              }
+            },
+            "direction": "Ascending"
+          }
+        ]
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

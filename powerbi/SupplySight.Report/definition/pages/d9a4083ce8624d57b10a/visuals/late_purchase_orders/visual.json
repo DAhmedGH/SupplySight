@@ -1,0 +1,274 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "late_purchase_orders",
+  "position": {
+    "x": 976,
+    "y": 264,
+    "z": 0,
+    "height": 332,
+    "width": 904,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "SupplierLine"
+                    }
+                  },
+                  "Property": "purchase_order_id"
+                }
+              },
+              "queryRef": "SupplierLine.purchase_order_id",
+              "nativeQueryRef": "purchase_order_id",
+              "displayName": "Purchase Order"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "SupplierLine"
+                    }
+                  },
+                  "Property": "po_line_id"
+                }
+              },
+              "queryRef": "SupplierLine.po_line_id",
+              "nativeQueryRef": "po_line_id",
+              "displayName": "PO Line"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "SupplierLine"
+                    }
+                  },
+                  "Property": "expected_delivery_date"
+                }
+              },
+              "queryRef": "SupplierLine.expected_delivery_date",
+              "nativeQueryRef": "expected_delivery_date",
+              "displayName": "Expected Delivery Date"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "SupplierLine"
+                    }
+                  },
+                  "Property": "received_date"
+                }
+              },
+              "queryRef": "SupplierLine.received_date",
+              "nativeQueryRef": "received_date",
+              "displayName": "Received Date"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "SupplierLine"
+                    }
+                  },
+                  "Property": "ordered_quantity"
+                }
+              },
+              "queryRef": "SupplierLine.ordered_quantity",
+              "nativeQueryRef": "ordered_quantity",
+              "displayName": "Ordered Quantity"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "SupplierLine"
+                    }
+                  },
+                  "Property": "received_quantity"
+                }
+              },
+              "queryRef": "SupplierLine.received_quantity",
+              "nativeQueryRef": "received_quantity",
+              "displayName": "Received Quantity"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "SupplierLine"
+                    }
+                  },
+                  "Property": "status"
+                }
+              },
+              "queryRef": "SupplierLine.status",
+              "nativeQueryRef": "status",
+              "displayName": "Status"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "SupplierLine"
+                    }
+                  },
+                  "Property": "is_late_as_of_cutoff"
+                }
+              },
+              "queryRef": "SupplierLine.is_late_as_of_cutoff",
+              "nativeQueryRef": "is_late_as_of_cutoff",
+              "displayName": "Late at Cutoff"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "9997a7b00308a9a31b30",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "SupplierLine"
+              }
+            },
+            "Property": "purchase_order_id"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "2aac9f39254a70229c5a",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "SupplierLine"
+              }
+            },
+            "Property": "po_line_id"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "a6c7163acc90cb092dec",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "SupplierLine"
+              }
+            },
+            "Property": "expected_delivery_date"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "a8d7f9e0693e242e4625",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "SupplierLine"
+              }
+            },
+            "Property": "received_date"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "60efa04425dc43aa4ae1",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "SupplierLine"
+              }
+            },
+            "Property": "ordered_quantity"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "86182f700b678ba4876d",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "SupplierLine"
+              }
+            },
+            "Property": "received_quantity"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "c18e3c8050494ad83004",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "SupplierLine"
+              }
+            },
+            "Property": "status"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "217ae57b7309371010b7",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "SupplierLine"
+              }
+            },
+            "Property": "is_late_as_of_cutoff"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
+  }
+}

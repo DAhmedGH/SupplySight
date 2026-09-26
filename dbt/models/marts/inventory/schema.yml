@@ -1,0 +1,38 @@
+version: 2
+
+models:
+  - name: inventory_detail
+    description: Inventory snapshot detail at the CORE inventory_snapshot_key grain. Warning rows remain visible; CORE has already excluded quarantined balances.
+    columns:
+      - {name: inventory_snapshot_key, description: CORE snapshot fact key retained for traceability., tests: [not_null, unique]}
+      - {name: snapshot_date_key, description: Snapshot date dimension key., tests: [not_null, {relationships: {arguments: {to: ref('dim_date'), field: date_key}}}]}
+      - {name: warehouse_key, description: CORE warehouse dimension key., tests: [not_null, {relationships: {arguments: {to: ref('dim_warehouse'), field: warehouse_key}}}]}
+      - {name: product_key, description: Observed product version key; see product_history_fallback., tests: [not_null, {relationships: {arguments: {to: ref('dim_product'), field: product_key}}}]}
+      - {name: available_units, description: Available units from the source snapshot., tests: [not_null]}
+      - {name: inventory_value, description: Inventory value from CORE., tests: [not_null]}
+      - {name: quality_status, description: CLEAN or WARNING source quality state., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING]}}}]}
+      - {name: product_history_fallback, description: True when the snapshot predates the first observed product version., tests: [not_null]}
+      - {name: batch_id, description: RAW ingestion batch identifier., tests: [not_null]}
+  - name: inventory_monthly
+    description: One row per product business key, warehouse, and calendar month. Average balances use observed snapshots; month-end is the last observed snapshot in the month. Demand windows end on calendar month end.
+    tests:
+      - unique_combination_of_columns: {arguments: {combination_of_columns: [product_id, warehouse_id, month_start]}}
+    columns:
+      - {name: inventory_monthly_key, description: Deterministic mart row key., tests: [not_null, unique]}
+      - {name: product_key, description: Month-end CORE product version key., tests: [not_null, {relationships: {arguments: {to: ref('dim_product'), field: product_key}}}]}
+      - {name: inventory_snapshot_key, description: Month-end CORE snapshot key., tests: [not_null, {relationships: {arguments: {to: ref('fact_inventory_snapshot'), field: inventory_snapshot_key}}}]}
+      - {name: product_id, description: Stable product business key., tests: [not_null]}
+      - {name: warehouse_id, description: Warehouse business key., tests: [not_null]}
+      - {name: warehouse_key, description: Month-end CORE warehouse key used for demand matching., tests: [not_null, {relationships: {arguments: {to: ref('dim_warehouse'), field: warehouse_key}}}]}
+      - {name: month_start, description: First date of calendar month., tests: [not_null]}
+      - {name: snapshot_count, description: Number of eligible observed snapshot rows in month., tests: [not_null]}
+      - {name: avg_inventory_value, description: Arithmetic mean of inventory_value over observed snapshots., tests: [not_null]}
+      - {name: stockout_rate, description: Stockout snapshots divided by observed snapshots., tests: [not_null]}
+      - {name: warning_snapshot_count, description: Number of warning quality snapshots retained in the month., tests: [not_null]}
+      - {name: product_history_fallback_snapshot_count, description: Number of snapshots assigned the earliest known product version., tests: [not_null]}
+      - {name: dead_stock_units, description: Month-end available units when month-end stock is positive and delivered demand is zero in trailing 90 days., tests: [not_null]}
+      - {name: dead_stock_value, description: Available units valued at the month-end snapshot's per-on-hand-unit value when delivered demand is zero in trailing 90 days., tests: [not_null]}
+      - {name: demand_units_trailing_90d, description: Delivered CORE order quantity in the 90 calendar days ending month end., tests: [not_null]}
+      - {name: sales_cogs_trailing_90d, description: Delivered order quantity times the CORE product-version unit cost in the same window., tests: [not_null]}
+      - {name: is_dead_stock_trailing_90d, description: True when month-end stock is positive and no delivered demand is observed in trailing 90 days., tests: [not_null]}
+      - {name: product_history_fallback, description: Month-end snapshot product history fallback indicator., tests: [not_null]}

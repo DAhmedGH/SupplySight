@@ -1,0 +1,37 @@
+{
+  "position": {
+    "width": 904,
+    "y": 240,
+    "z": 10,
+    "x": 976,
+    "tabOrder": 0,
+    "height": 24
+  },
+  "name": "late_po_heading",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "textStyle": {
+                      "fontFamily": "Segoe UI",
+                      "fontWeight": "bold",
+                      "fontSize": "14pt"
+                    },
+                    "value": "Late PO lines | due-month filter applies"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

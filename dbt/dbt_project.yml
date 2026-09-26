@@ -1,0 +1,44 @@
+name: supplysight
+version: 1.0.0
+config-version: 2
+
+profile: supplysight
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  supplysight:
+    staging:
+      +materialized: view
+      +tags: [staging]
+    intermediate:
+      +schema: INTERMEDIATE
+      +materialized: view
+      +tags: [intermediate]
+    core:
+      +schema: CORE
+      +materialized: table
+      +tags: [core]
+    marts:
+      +schema: MARTS
+      +materialized: table
+      +tags: [marts]
+    inventory_intelligence:
+      intermediate:
+        +schema: INTERMEDIATE
+        +materialized: view
+        +tags: [inventory_intelligence]
+      marts:
+        +schema: MARTS
+        +materialized: table
+        +tags: [inventory_intelligence]

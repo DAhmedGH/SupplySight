@@ -1,0 +1,38 @@
+version: 2
+
+models:
+  - name: supplier_detail
+    description: One row per eligible CORE purchase-order line. Service measures are assessed against the maximum observed order date, not the execution date.
+    columns:
+      - {name: purchase_order_fact_key, description: CORE purchase-order fact key., tests: [not_null, unique]}
+      - {name: po_line_id, description: CORE line business key and mart grain., tests: [not_null, unique]}
+      - {name: supplier_key, description: CORE supplier dimension key., tests: [not_null, {relationships: {arguments: {to: ref('dim_supplier'), field: supplier_key}}}]}
+      - {name: product_key, description: CORE product version key., tests: [not_null, {relationships: {arguments: {to: ref('dim_product'), field: product_key}}}]}
+      - {name: supplier_spend, description: Ordered quantity multiplied by PO unit cost., tests: [not_null]}
+      - {name: is_due_as_of_cutoff, description: Expected date is on or before maximum observed PO order date., tests: [not_null]}
+      - {name: quality_status, description: CLEAN or WARNING source quality state., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING]}}}]}
+      - {name: product_history_fallback, description: True when PO date predates first observed product version., tests: [not_null]}
+      - {name: batch_id, description: RAW ingestion batch identifier., tests: [not_null]}
+      - {name: as_of_date, description: Maximum observed CORE PO order date used as reporting cutoff., tests: [not_null]}
+  - name: supplier_monthly
+    description: One row per supplier and month. Spend is assigned to PO order month; OTIF, fill, late order, and lead-time measures use expected-delivery month cohorts.
+    tests:
+      - unique_combination_of_columns: {arguments: {combination_of_columns: [supplier_key, month_start]}}
+    columns:
+      - {name: supplier_monthly_key, description: Deterministic mart row key., tests: [not_null, unique]}
+      - {name: supplier_key, description: CORE supplier dimension key., tests: [not_null, {relationships: {arguments: {to: ref('dim_supplier'), field: supplier_key}}}]}
+      - {name: supplier_id, description: Supplier business key., tests: [not_null]}
+      - {name: month_start, description: First date of service cohort or spend calendar month., tests: [not_null]}
+      - {name: supplier_spend, description: Sum of ordered costs for lines ordered during month; null if no spend cohort.}
+      - {name: warning_po_line_count, description: Warning quality PO lines in the spend cohort, assigned by order month.}
+      - {name: product_history_fallback_po_line_count, description: PO lines using earliest product version in the spend cohort, assigned by order month.}
+      - {name: service_warning_line_count, description: Warning quality PO lines in the expected-delivery month cohort.}
+      - {name: service_fallback_line_count, description: PO lines using earliest product version in the expected-delivery month cohort.}
+      - {name: otif_numerator, description: Due lines received on or before expected date and in full.}
+      - {name: otif_denominator, description: Lines whose expected date is on or before as-of cutoff.}
+      - {name: fill_rate_numerator, description: Received quantity capped at ordered quantity in due expected-date cohort.}
+      - {name: fill_rate_denominator, description: Ordered quantity in due expected-date cohort.}
+      - {name: late_purchase_order_count, description: Past-due open lines plus received lines received after expected date as of cutoff.}
+      - {name: observed_avg_lead_time_days, description: Average order-to-receipt days for received lines in expected-date cohort.}
+      - {name: observed_lead_time_stddev_days, description: Sample standard deviation of observed order-to-receipt days.}
+      - {name: as_of_date, description: Maximum observed CORE PO order date used as reporting cutoff., tests: [not_null]}

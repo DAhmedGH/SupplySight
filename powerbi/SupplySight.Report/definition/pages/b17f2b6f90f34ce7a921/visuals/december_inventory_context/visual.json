@@ -1,0 +1,111 @@
+{
+  "position": {
+    "width": 1840,
+    "y": 624,
+    "z": 0,
+    "x": 40,
+    "tabOrder": 0,
+    "height": 112
+  },
+  "name": "december_inventory_context",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Excess Units"
+                }
+              },
+              "nativeQueryRef": "Excess Units",
+              "queryRef": "Report Measures.Excess Units"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Excess Value"
+                }
+              },
+              "nativeQueryRef": "Excess Value",
+              "queryRef": "Report Measures.Excess Value"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Dead Stock Units"
+                }
+              },
+              "nativeQueryRef": "Dead Stock Units",
+              "queryRef": "Report Measures.Dead Stock Units"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Dead Stock Value"
+                }
+              },
+              "nativeQueryRef": "Dead Stock Value",
+              "queryRef": "Report Measures.Dead Stock Value"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Trailing 90d Days of Supply"
+                }
+              },
+              "nativeQueryRef": "Trailing 90d Days of Supply",
+              "queryRef": "Report Measures.Trailing 90d Days of Supply"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "value": [
+        {
+          "properties": {
+            "labelDisplayUnits": {
+              "expr": {
+                "Literal": {
+                  "Value": "1L"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,14 @@
+.git
+.venv
+.env
+.env.*
+airflow/.env
+data/
+dbt/target/
+dbt/logs/
+dbt/profiles.yml
+airflow/logs/
+**/__pycache__/
+**/*.pyc
+**/*.p8
+**/*.pem

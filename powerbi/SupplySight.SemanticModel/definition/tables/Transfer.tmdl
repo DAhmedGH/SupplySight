@@ -1,0 +1,55 @@
+table Transfer
+	lineageTag: 4ddb3e7e-e9ba-4f87-b607-c32a9dbf7b77
+
+	column forecast_run_id
+		dataType: string
+		isHidden
+		lineageTag: 14ea1a4b-88a7-449b-a6d2-df30a54dc485
+		summarizeBy: none
+		sourceColumn: forecast_run_id
+
+	column product_id
+		dataType: string
+		isHidden
+		lineageTag: 8699460c-4244-4190-a95f-8c2b6e1716e1
+		summarizeBy: none
+		sourceColumn: product_id
+
+	column source_warehouse_key
+		dataType: string
+		isHidden
+		lineageTag: 4ea7e1a3-7468-4ff2-9a20-debd1f1e7f8b
+		summarizeBy: none
+		sourceColumn: source_warehouse_key
+
+	column destination_warehouse_key
+		dataType: string
+		isHidden
+		lineageTag: 63732561-1afe-40ff-8644-0428c7cddfc6
+		summarizeBy: none
+		sourceColumn: destination_warehouse_key
+
+	column transfer_units
+		dataType: double
+		lineageTag: bfc02800-ec1f-4817-9a2b-e4e2d7842f4a
+		summarizeBy: none
+		sourceColumn: transfer_units
+
+	column destination_risk_tier
+		dataType: string
+		lineageTag: 269fec11-40b7-4b52-83a8-55d34d3c899e
+		summarizeBy: none
+		sourceColumn: destination_risk_tier
+
+	partition Transfer = m
+		mode: import
+		source =
+				let
+				    RunId = #"ScenarioRunId",
+				    Raw = #"DevTable"("MARTS", "MART_INVENTORY_TRANSFERS"),
+				    Filtered = Table.SelectRows(Raw, each [FORECAST_RUN_ID] = RunId),
+				    Selected = Table.SelectColumns(Filtered, {"FORECAST_RUN_ID", "PRODUCT_ID", "SOURCE_WAREHOUSE_KEY", "DESTINATION_WAREHOUSE_KEY", "TRANSFER_UNITS", "DESTINATION_RISK_TIER"}),
+				    Result = Table.TransformColumnNames(Selected, Text.Lower)
+				in
+				    Result
+

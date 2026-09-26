@@ -1,0 +1,132 @@
+version: 2
+
+models:
+  - name: int_inventory_planning_supply
+    description: >-
+      Forecast run × eligible PO line at the 2024-12-31 planning cutoff. PO status
+      is the period-end source state; only future-due, unreceived in-transit lines
+      are scheduled. Snapshot in-transit units are not added to this PO projection.
+    tests:
+      - unique_combination_of_columns: {arguments: {combination_of_columns: [forecast_run_id, po_line_id]}}
+    columns:
+      - {name: forecast_run_id, tests: [not_null]}
+      - {name: planning_cutoff, tests: [not_null]}
+      - {name: po_line_id, tests: [not_null]}
+      - {name: inbound_classification, tests: [{accepted_values: {arguments: {values: [FUTURE_ORDER_EXCLUDED, POST_CUTOFF_RECEIPT_DATE_EXCLUDED, SCHEDULED_INBOUND, OVERDUE_UNCERTAIN, OPEN_UNCERTAIN, NOT_PLANNED]}}}]}
+      - {name: scheduled_inbound_units, description: Dated PO units admitted to the daily projection; does not use snapshot in-transit units.}
+      - {name: supplier_id, description: Supplier on the eligible PO line.}
+      - {name: planned_lead_time_days, description: Expected delivery date minus order date; positive values are usable for reorder timing.}
+      - {name: quality_status, description: Existing MARTS supplier-detail quality state.}
+      - {name: product_history_fallback, description: Product history fallback flag retained from CORE.}
+      - {name: batch_id, description: Ingestion batch lineage retained from MARTS supplier detail.}
+
+  - name: int_inventory_planning_position
+    description: >-
+      Forecast run × stable product business ID × warehouse position. Joins only
+      the exact cutoff snapshot, chooses the latest eligible cutoff PO, and retains
+      incomplete forecast or inventory inputs with explicit completeness state.
+    tests:
+      - unique_combination_of_columns: {arguments: {combination_of_columns: [forecast_run_id, planning_cutoff, product_id, warehouse_key]}}
+    columns:
+      - {name: forecast_run_id, tests: [not_null]}
+      - {name: planning_cutoff, tests: [not_null]}
+      - {name: product_id, tests: [not_null]}
+      - {name: warehouse_key, tests: [not_null]}
+      - {name: warehouse_id, tests: [not_null]}
+      - {name: selected_supplier_id, description: Supplier on the most recently ordered eligible PO; null when no PO relationship exists.}
+      - {name: supplier_selection_reason, tests: [{accepted_values: {arguments: {values: [MOST_RECENT_ELIGIBLE_PO, NO_ELIGIBLE_PO_RELATIONSHIP]}}}]}
+      - {name: completeness_reason, tests: [{accepted_values: {arguments: {values: [COMPLETE, MISSING_CUTOFF_SNAPSHOT, MISSING_FORECAST_SERIES, INCOMPATIBLE_FORECAST_CUTOFF, INCOMPLETE_FORECAST_HORIZON, MISSING_FORECAST_BOUNDS]}}}]}
+      - {name: available_units, description: Exact 2024-12-31 MARTS inventory snapshot available units; remains null when the snapshot is absent.}
+      - {name: snapshot_in_transit_units_descriptive_only, description: Retained as descriptive context and excluded from scheduled inbound.}
+      - {name: forecast_horizon_compatible, tests: [not_null]}
+      - {name: forecast_bounds_complete, tests: [not_null]}
+      - {name: risk_assessable, tests: [not_null]}
+
+  - name: int_inventory_planning_daily
+    description: >-
+      Forecast run × product × warehouse × forecast day. Monthly point and upper
+      forecasts are prorated uniformly over calendar days and combined with dated
+      PO inbound to produce auditable point and upper-demand inventory paths.
+    tests:
+      - unique_combination_of_columns: {arguments: {combination_of_columns: [forecast_run_id, planning_cutoff, product_id, warehouse_key, forecast_date]}}
+    columns:
+      - {name: forecast_run_id, tests: [not_null]}
+      - {name: planning_cutoff, tests: [not_null]}
+      - {name: product_id, tests: [not_null]}
+      - {name: warehouse_key, tests: [not_null]}
+      - {name: forecast_date, tests: [not_null]}
+      - {name: daily_point_demand, description: Monthly predicted demand divided by the number of calendar days in that month.}
+      - {name: daily_upper_demand, description: Empirical monthly upper bound divided by calendar days in month.}
+      - {name: scheduled_inbound_units, description: PO-derived units scheduled to arrive on this date.}
+      - {name: cumulative_scheduled_inbound_units, description: Cumulative PO inbound through forecast date.}
+      - {name: cumulative_point_demand, description: Cumulative point demand through forecast date.}
+      - {name: cumulative_upper_demand, description: Cumulative upper demand through forecast date.}
+      - {name: projected_point_inventory, description: Cutoff available units plus cumulative scheduled PO inbound less point demand.}
+      - {name: projected_stress_inventory, description: Cutoff available units plus cumulative scheduled PO inbound less upper demand.}
+      - {name: point_deficit_units, description: Positive shortfall below zero on the point path.}
+      - {name: stress_deficit_units, description: Positive shortfall below zero on the upper-demand stress path.}
+
+  - name: mart_inventory_planning_monthly
+    description: >-
+      Forecast run × product × warehouse × forecast month. Monthly demand,
+      scheduled inbound, opening and closing point/stress positions, and coverage
+      flags support reconciliation to the daily planning path.
+    tests:
+      - unique_combination_of_columns: {arguments: {combination_of_columns: [forecast_run_id, planning_cutoff, product_id, warehouse_key, forecast_month]}}
+    columns:
+      - {name: forecast_run_id, tests: [not_null]}
+      - {name: planning_cutoff, tests: [not_null]}
+      - {name: product_id, tests: [not_null]}
+      - {name: warehouse_key, tests: [not_null]}
+      - {name: forecast_month, tests: [not_null]}
+      - {name: inventory_snapshot_key, description: Selected exact-cutoff snapshot lineage; null when unavailable.}
+      - {name: scheduled_inbound_units, description: PO-derived dated inbound within the month.}
+      - {name: empirical_stress_buffer_units, description: Monthly upper-demand minus point-demand buffer; empirical forecast stress, not statistical safety stock.}
+      - {name: forecast_month_complete, tests: [not_null]}
+      - {name: forecast_bounds_complete, tests: [not_null]}
+
+  - name: mart_inventory_recommendations
+    description: >-
+      Forecast run × stable product business ID × warehouse decision support.
+      Risk tiers are deterministic rules. Suggested reorder units use upper-demand
+      deficit from standard PO arrival through horizon and remain null if required
+      cutoff, forecast, supplier, or lead-time inputs are unavailable.
+    tests:
+      - unique_combination_of_columns: {arguments: {combination_of_columns: [forecast_run_id, planning_cutoff, product_id, warehouse_key]}}
+    columns:
+      - {name: forecast_run_id, tests: [not_null]}
+      - {name: planning_cutoff, tests: [not_null]}
+      - {name: product_id, tests: [not_null]}
+      - {name: warehouse_key, tests: [not_null]}
+      - {name: inventory_snapshot_key, description: Exact cutoff inventory snapshot key; null when missing.}
+      - {name: selected_supplier_id, description: Historical supplier context from most recent eligible PO.}
+      - {name: supplier_selection_reason, tests: [{accepted_values: {arguments: {values: [MOST_RECENT_ELIGIBLE_PO, NO_ELIGIBLE_PO_RELATIONSHIP]}}}]}
+      - {name: completeness_reason, tests: [{accepted_values: {arguments: {values: [COMPLETE, MISSING_CUTOFF_SNAPSHOT, MISSING_FORECAST_SERIES, INCOMPATIBLE_FORECAST_CUTOFF, INCOMPLETE_FORECAST_HORIZON, MISSING_FORECAST_BOUNDS]}}}]}
+      - {name: stockout_risk_tier, tests: [{accepted_values: {arguments: {values: [UNASSESSABLE, CRITICAL, HIGH, MEDIUM, LOW]}}}]}
+      - {name: reorder_unavailable_reason, description: Null when reorder is available; otherwise states the first missing requirement.}
+      - {name: expected_shortage_units, description: Additional units required to keep point projection nonnegative.}
+      - {name: stressed_shortage_units, description: Additional units required to keep upper-demand projection nonnegative.}
+      - {name: suggested_reorder_units, description: Whole-unit ceiling of maximum upper-demand deficit from standard reorder arrival onward.}
+      - {name: immediate_mitigation_flag, description: True when a modeled point or stress shortage begins before standard reorder arrival.}
+      - {name: empirical_stress_buffer_units, description: Upper minus point lead-time demand; empirical forecast stress, not statistical safety stock.}
+      - {name: potential_revenue_exposure, description: Expected shortage units multiplied by pre-cutoff delivered recognized historical realized unit value.}
+      - {name: has_forecast_fallback, tests: [not_null]}
+      - {name: snapshot_product_history_fallback, description: May be null when the cutoff snapshot is unavailable.}
+
+  - name: mart_inventory_transfers
+    description: >-
+      Forecast run × product × source warehouse × destination warehouse. Positive
+      whole-unit allocations use cumulative interval overlap, protect each source
+      against its own upper-demand path, and cap destination need at expected
+      shortage. These candidates have no modeled transit feasibility or cost.
+    tests:
+      - unique_combination_of_columns: {arguments: {combination_of_columns: [forecast_run_id, product_id, source_warehouse_key, destination_warehouse_key]}}
+    columns:
+      - {name: forecast_run_id, tests: [not_null]}
+      - {name: planning_cutoff, tests: [not_null]}
+      - {name: product_id, tests: [not_null]}
+      - {name: source_warehouse_key, tests: [not_null]}
+      - {name: destination_warehouse_key, tests: [not_null]}
+      - {name: transfer_units, description: Positive whole-unit allocation from interval overlap., tests: [not_null]}
+      - {name: source_inventory_snapshot_key, description: Exact cutoff source snapshot lineage.}
+      - {name: destination_inventory_snapshot_key, description: Exact cutoff destination snapshot lineage.}

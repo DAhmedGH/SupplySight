@@ -1,0 +1,65 @@
+{
+  "position": {
+    "width": 960,
+    "y": 128,
+    "z": 0,
+    "x": 40,
+    "tabOrder": 0,
+    "height": 112
+  },
+  "name": "model_comparison",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Baseline Validation MAE"
+                }
+              },
+              "nativeQueryRef": "Baseline Validation MAE",
+              "queryRef": "Report Measures.Baseline Validation MAE"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Holt Validation MAE"
+                }
+              },
+              "nativeQueryRef": "Holt Validation MAE",
+              "queryRef": "Report Measures.Holt Validation MAE"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Baseline Selected Series Count"
+                }
+              },
+              "nativeQueryRef": "Baseline Selected Series Count",
+              "queryRef": "Report Measures.Baseline Selected Series Count"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

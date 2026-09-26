@@ -1,0 +1,37 @@
+{
+  "position": {
+    "width": 960,
+    "y": 104,
+    "z": 10,
+    "x": 40,
+    "tabOrder": 0,
+    "height": 20
+  },
+  "name": "model_selection_note",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "textStyle": {
+                      "fontFamily": "Segoe UI",
+                      "fontWeight": "regular",
+                      "fontSize": "12pt"
+                    },
+                    "value": "Baseline outperformed damped Holt across paired-series validation."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,30 @@
+version: 2
+
+sources:
+  - name: forecasting
+    description: Phase 9 forecast persistence in the existing DEV forecasting schema.
+    database: SUPPLY_CHAIN_DEV
+    schema: FORECASTING
+    tables:
+      - name: current_forecasts
+        identifier: CURRENT_FORECASTS
+        description: Current persisted monthly point forecasts and empirical error bounds.
+        columns:
+          - {name: RUN_ID, description: Forecast execution identifier.}
+          - {name: FORECAST_DATE, description: First day of forecast month.}
+          - {name: PRODUCT_ID, description: Stable planning-series product business key.}
+          - {name: PRODUCT_KEY, description: Optional product dimension key.}
+          - {name: WAREHOUSE_KEY, description: Warehouse dimension key.}
+          - {name: PREDICTED_DEMAND, description: Monthly point forecast.}
+          - {name: UPPER_BOUND, description: Empirical upper forecast error band.}
+          - {name: FALLBACK_USED, description: Whether the series used a fallback model.}
+      - name: run_metadata
+        identifier: RUN_METADATA
+        description: Forecast run status, observed-through date, horizon and lineage.
+        columns:
+          - {name: RUN_ID, description: Forecast execution identifier.}
+          - {name: STATUS, description: Forecast run completion status.}
+          - {name: OBSERVED_THROUGH, description: Last date of input history observed by the run.}
+          - {name: HORIZON, description: Forecast horizon in months.}
+          - {name: SERIES_SUCCEEDED, description: Successful series count.}
+          - {name: RECORDS_PRODUCED, description: Persisted forecast record count.}

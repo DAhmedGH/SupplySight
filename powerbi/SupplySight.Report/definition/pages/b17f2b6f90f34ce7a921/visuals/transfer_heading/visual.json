@@ -1,0 +1,37 @@
+{
+  "position": {
+    "width": 576,
+    "y": 760,
+    "z": 10,
+    "x": 1304,
+    "tabOrder": 0,
+    "height": 40
+  },
+  "name": "transfer_heading",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "textStyle": {
+                      "fontFamily": "Segoe UI",
+                      "fontWeight": "bold",
+                      "fontSize": "11pt"
+                    },
+                    "value": "Transfer candidates | transit time, cost, routing and capacity are not modeled"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

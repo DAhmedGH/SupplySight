@@ -1,0 +1,106 @@
+name: supplysight-airflow
+
+x-airflow-common: &airflow-common
+  build:
+    context: ..
+    dockerfile: airflow/Dockerfile
+    args:
+      AIRFLOW_VERSION: 2.10.5
+  environment: &airflow-environment
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY:?Set AIRFLOW_FERNET_KEY in airflow/.env}
+    AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_WEBSERVER_SECRET_KEY:?Set AIRFLOW_WEBSERVER_SECRET_KEY in airflow/.env}
+    # Keep DB credentials URL-unreserved; see airflow/.env.example.
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_DB_USER:?Set AIRFLOW_DB_USER in airflow/.env}:${AIRFLOW_DB_PASSWORD:?Set AIRFLOW_DB_PASSWORD in airflow/.env}@postgres/airflow
+    AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: "true"
+    AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
+    PYTHONPATH: /opt/supplysight/src
+    SUPPLYSIGHT_PROJECT_DIR: /opt/supplysight
+    DBT_PROFILES_DIR: /opt/supplysight/dbt
+  volumes:
+    - ./dags:/opt/airflow/dags:ro
+    - ./logs:/opt/airflow/logs
+    - ../:/opt/supplysight
+  user: "${AIRFLOW_UID:-50000}:0"
+  depends_on:
+    postgres:
+      condition: service_healthy
+
+x-snowflake-environment: &snowflake-environment
+  SNOWFLAKE_ACCOUNT: ${SNOWFLAKE_ACCOUNT:?Set SNOWFLAKE_ACCOUNT in airflow/.env}
+  SNOWFLAKE_USER: ${SNOWFLAKE_USER:?Set SNOWFLAKE_USER in airflow/.env}
+  SNOWFLAKE_ROLE: ${SNOWFLAKE_ROLE:?Set SNOWFLAKE_ROLE in airflow/.env}
+  SNOWFLAKE_DATABASE: ${SNOWFLAKE_DATABASE:-SUPPLY_CHAIN_DEV}
+  SNOWFLAKE_WAREHOUSE: ${SNOWFLAKE_WAREHOUSE:-SUPPLY_CHAIN_DEV_WH}
+  SNOWFLAKE_SCHEMA: ${SNOWFLAKE_SCHEMA:-RAW}
+  SNOWFLAKE_PRIVATE_KEY_FILE: /run/secrets/snowflake_key.p8
+  SNOWFLAKE_PRIVATE_KEY_PASSPHRASE: ${SNOWFLAKE_PRIVATE_KEY_PASSPHRASE:-}
+
+services:
+  postgres:
+    image: postgres:16.4
+    environment:
+      POSTGRES_USER: ${AIRFLOW_DB_USER:?Set AIRFLOW_DB_USER in airflow/.env}
+      POSTGRES_PASSWORD: ${AIRFLOW_DB_PASSWORD:?Set AIRFLOW_DB_PASSWORD in airflow/.env}
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${AIRFLOW_DB_USER}", "-d", "airflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  airflow-init:
+    <<: *airflow-common
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - airflow db migrate && airflow pools set supplysight_dev_raw_warehouse 1 'Serialize DEV RAW loads and warehouse refreshes' && (airflow users create --username admin --password "$$AIRFLOW_ADMIN_PASSWORD" --firstname SupplySight --lastname Admin --role Admin --email admin@localhost || airflow users list | grep -q 'admin')
+    environment:
+      <<: *airflow-environment
+      AIRFLOW_ADMIN_PASSWORD: ${AIRFLOW_ADMIN_PASSWORD:?Set AIRFLOW_ADMIN_PASSWORD in airflow/.env}
+    restart: "no"
+
+  airflow-webserver:
+    <<: *airflow-common
+    command: webserver
+    ports:
+      - "127.0.0.1:${AIRFLOW_WEBSERVER_PORT:-8080}:8080"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-scheduler:
+    <<: *airflow-common
+    environment:
+      <<: [*airflow-environment, *snowflake-environment]
+    volumes:
+      - ./dags:/opt/airflow/dags:ro
+      - ./logs:/opt/airflow/logs
+      - ../:/opt/supplysight
+      - type: bind
+        source: ${SNOWFLAKE_PRIVATE_KEY_HOST_PATH:?Set SNOWFLAKE_PRIVATE_KEY_HOST_PATH in airflow/.env}
+        target: /run/secrets/snowflake_key.p8
+        read_only: true
+    command: scheduler
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8974/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+volumes:
+  postgres-db-volume:

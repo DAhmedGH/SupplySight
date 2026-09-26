@@ -1,0 +1,151 @@
+version: 2
+
+models:
+  - name: dim_date
+    description: Calendar dimension, one row per date, covering 2000 through 2050.
+    columns:
+      - {name: date_key, description: Integer YYYYMMDD surrogate key., tests: [not_null, unique]}
+      - {name: date_day, description: Calendar date., tests: [not_null, unique]}
+      - {name: year_number, description: Calendar year., tests: [not_null]}
+      - {name: month_number, description: Calendar month number., tests: [not_null]}
+      - {name: day_of_week_iso, description: ISO day of week from 1 to 7., tests: [not_null]}
+  - name: dim_product
+    description: Product dimension with warehouse-observed SCD Type 2 versions. Facts use the version observed at event date; events before the first observation use the earliest version and flag the fallback.
+    tests:
+      - scd2_validity: {arguments: {business_key: product_id}}
+    columns:
+      - {name: product_key, description: Deterministic warehouse surrogate key for product version., tests: [not_null, unique]}
+      - {name: product_id, description: Stable product business key., tests: [not_null]}
+      - {name: valid_from, description: First warehouse-observed timestamp for this version., tests: [not_null]}
+      - {name: valid_to, description: Exclusive end of observed validity; null for current version.}
+      - {name: is_current, description: True for the current observed product version., tests: [not_null]}
+      - {name: quality_status, description: Source quality classification retained on each version., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING, QUARANTINED]}}}]}
+      - {name: quality_issues, description: Source quality issue codes.}
+      - {name: batch_id, description: Source ingestion batch for this observed version.}
+  - name: dim_supplier
+    description: Current supplier attributes; grain is supplier_id. Quarantined source rows are excluded.
+    columns:
+      - {name: supplier_key, description: Deterministic warehouse surrogate key., tests: [not_null, unique]}
+      - {name: supplier_id, description: Supplier business key., tests: [not_null, unique]}
+      - {name: quality_status, description: Source quality classification., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING]}}}]}
+      - {name: quality_issues, description: Source issue codes.}
+  - name: dim_warehouse
+    description: Current warehouse attributes; grain is warehouse_id. Quarantined source rows are excluded.
+    columns:
+      - {name: warehouse_key, description: Deterministic warehouse surrogate key., tests: [not_null, unique]}
+      - {name: warehouse_id, description: Warehouse business key., tests: [not_null, unique]}
+      - {name: quality_status, description: Source quality classification., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING]}}}]}
+      - {name: quality_issues, description: Source issue codes.}
+  - name: dim_customer
+    description: Current customer attributes; grain is customer_id. Quarantined source rows are excluded.
+    columns:
+      - {name: customer_key, description: Deterministic warehouse surrogate key., tests: [not_null, unique]}
+      - {name: customer_id, description: Customer business key., tests: [not_null, unique]}
+      - {name: quality_status, description: Source quality classification., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING]}}}]}
+      - {name: quality_issues, description: Source issue codes.}
+  - name: dim_carrier
+    description: Distinct normalized carriers observed in non-quarantined shipment rows; grain is carrier_name.
+    columns:
+      - {name: carrier_key, description: Deterministic warehouse surrogate key., tests: [not_null, unique]}
+      - {name: carrier_name, description: Uppercase trimmed carrier name., tests: [not_null, unique]}
+  - name: fact_orders
+    description: One row per eligible order_line_id. Measures include ordered quantity, net order amount, and discount. WARNING rows remain included; quarantined or unusable rows are represented in int_fact_quality_exceptions.
+    tests:
+      - fact_eligibility_reconciliation: {arguments: {intermediate_model: int_order_eligibility, key_column: order_line_id}}
+      - no_quarantined_product_keys
+    columns:
+      - {name: order_fact_key, description: Deterministic warehouse fact key., tests: [not_null, unique]}
+      - {name: order_line_id, description: Fact grain and source business key., tests: [not_null, unique]}
+      - {name: order_date_key, description: Order date dimension key., tests: [not_null, {relationships: {arguments: {to: ref('dim_date'), field: date_key}}}]}
+      - {name: customer_key, description: Customer dimension key., tests: [not_null, {relationships: {arguments: {to: ref('dim_customer'), field: customer_key}}}]}
+      - {name: product_key, description: Product version key selected as of order date or earliest-version fallback., tests: [not_null, {relationships: {arguments: {to: ref('dim_product'), field: product_key}}}]}
+      - {name: warehouse_key, description: Warehouse dimension key., tests: [not_null, {relationships: {arguments: {to: ref('dim_warehouse'), field: warehouse_key}}}]}
+      - {name: product_history_fallback, description: True when order date precedes all observed product versions., tests: [not_null]}
+      - {name: quantity, description: Ordered quantity., tests: [not_null]}
+      - {name: net_order_amount, description: Quantity multiplied by price after discount.}
+      - {name: quality_status, description: Source quality classification., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING]}}}]}
+      - {name: quality_issues, description: Source issue codes.}
+      - {name: batch_id, description: RAW ingestion batch identifier.}
+  - name: fact_inventory_snapshot
+    description: One row per snapshot_date, warehouse_id, product_id. Quarantined balance rows are excluded and reconciled to the quality exception model.
+    tests:
+      - unique_combination_of_columns: {arguments: {combination_of_columns: [snapshot_date, warehouse_id, product_id]}}
+      - fact_eligibility_reconciliation: {arguments: {intermediate_model: int_inventory_eligibility, key_column: inventory_snapshot_key}}
+      - no_quarantined_product_keys
+    columns:
+      - {name: inventory_snapshot_key, description: Deterministic warehouse fact key., tests: [not_null, unique]}
+      - {name: snapshot_date_key, description: Snapshot date dimension key., tests: [not_null, {relationships: {arguments: {to: ref('dim_date'), field: date_key}}}]}
+      - {name: warehouse_key, description: Warehouse dimension key., tests: [not_null, {relationships: {arguments: {to: ref('dim_warehouse'), field: warehouse_key}}}]}
+      - {name: product_key, description: Product version observed for the snapshot., tests: [not_null, {relationships: {arguments: {to: ref('dim_product'), field: product_key}}}]}
+      - {name: product_history_fallback, description: True when the snapshot predates all observed product versions., tests: [not_null]}
+      - {name: snapshot_date, description: Date part of fact grain., tests: [not_null]}
+      - {name: warehouse_id, description: Warehouse part of fact grain., tests: [not_null]}
+      - {name: product_id, description: Product part of fact grain., tests: [not_null]}
+      - {name: available_units, description: Available inventory quantity., tests: [not_null]}
+      - {name: quality_status, description: Source quality classification., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING]}}}]}
+      - {name: quality_issues, description: Source issue codes.}
+      - {name: batch_id, description: RAW ingestion batch identifier.}
+  - name: fact_purchase_orders
+    description: One row per eligible po_line_id. Ordered and received quantities and ordered cost are additive at line grain.
+    tests:
+      - fact_eligibility_reconciliation: {arguments: {intermediate_model: int_purchase_order_eligibility, key_column: po_line_id}}
+      - no_quarantined_product_keys
+      - optional_date_fk_coverage: {arguments: {date_key_pairs: [{date_column: expected_delivery_date, key_column: expected_delivery_date_key}, {date_column: received_date, key_column: received_date_key}]}}
+    columns:
+      - {name: purchase_order_fact_key, description: Deterministic warehouse fact key., tests: [not_null, unique]}
+      - {name: po_line_id, description: Fact grain and source business key., tests: [not_null, unique]}
+      - {name: order_date_key, description: Order date dimension key., tests: [not_null, {relationships: {arguments: {to: ref('dim_date'), field: date_key}}}]}
+      - {name: supplier_key, description: Supplier dimension key., tests: [not_null, {relationships: {arguments: {to: ref('dim_supplier'), field: supplier_key}}}]}
+      - {name: warehouse_key, description: Warehouse dimension key., tests: [not_null, {relationships: {arguments: {to: ref('dim_warehouse'), field: warehouse_key}}}]}
+      - {name: product_key, description: Product version key selected as of purchase order date., tests: [not_null, {relationships: {arguments: {to: ref('dim_product'), field: product_key}}}]}
+      - {name: product_history_fallback, description: True when purchase order predates all observed product versions., tests: [not_null]}
+      - {name: expected_delivery_date_key, description: Optional expected delivery date dimension key., tests: [{relationships: {arguments: {to: ref('dim_date'), field: date_key}}}]}
+      - {name: received_date_key, description: Optional receipt date dimension key., tests: [{relationships: {arguments: {to: ref('dim_date'), field: date_key}}}]}
+      - {name: ordered_quantity, description: Ordered quantity., tests: [not_null]}
+      - {name: received_quantity, description: Received quantity., tests: [not_null]}
+      - {name: ordered_cost, description: Ordered quantity multiplied by unit cost.}
+      - {name: quality_status, description: Source quality classification., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING]}}}]}
+      - {name: batch_id, description: RAW ingestion batch identifier.}
+  - name: fact_shipments
+    description: One row per eligible shipment_id. Shipment context resolves through all staged order lines. WARNING rows remain; quarantined or invalid rows enter quality exceptions.
+    tests:
+      - fact_eligibility_reconciliation: {arguments: {intermediate_model: int_shipment_eligibility, key_column: shipment_id}}
+      - no_quarantined_product_keys
+      - optional_date_fk_coverage: {arguments: {date_key_pairs: [{date_column: delivery_date, key_column: delivery_date_key}]}}
+    columns:
+      - {name: shipment_fact_key, description: Deterministic warehouse fact key., tests: [not_null, unique]}
+      - {name: shipment_id, description: Fact grain and source business key., tests: [not_null, unique]}
+      - {name: ship_date_key, description: Ship date dimension key., tests: [not_null, {relationships: {arguments: {to: ref('dim_date'), field: date_key}}}]}
+      - {name: delivery_date_key, description: Optional delivery date dimension key., tests: [{relationships: {arguments: {to: ref('dim_date'), field: date_key}}}]}
+      - {name: customer_key, description: Customer dimension key from associated order., tests: [not_null, {relationships: {arguments: {to: ref('dim_customer'), field: customer_key}}}]}
+      - {name: warehouse_key, description: Warehouse dimension key., tests: [not_null, {relationships: {arguments: {to: ref('dim_warehouse'), field: warehouse_key}}}]}
+      - {name: carrier_key, description: Carrier dimension key., tests: [not_null, {relationships: {arguments: {to: ref('dim_carrier'), field: carrier_key}}}]}
+      - {name: product_key, description: Product version selected as of ship date., tests: [not_null, {relationships: {arguments: {to: ref('dim_product'), field: product_key}}}]}
+      - {name: product_history_fallback, description: True when shipment date precedes all observed product versions., tests: [not_null]}
+      - {name: shipped_quantity, description: Shipped units., tests: [not_null]}
+      - {name: shipment_status, description: Shipment event state., tests: [not_null]}
+      - {name: quality_status, description: Source quality classification., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING]}}}]}
+      - {name: upstream_order_quality_status, description: Quality state of the associated order line; quarantined order context remains visible without excluding an otherwise valid shipment., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING, QUARANTINED]}}}]}
+      - {name: upstream_order_quality_issues, description: Issue codes from the associated order line.}
+      - {name: upstream_order_batch_id, description: RAW ingestion batch for associated order context.}
+      - {name: batch_id, description: RAW ingestion batch identifier.}
+  - name: fact_returns
+    description: One row per eligible return_id. Return context is inherited from its order line; WARNING rows remain included.
+    tests:
+      - fact_eligibility_reconciliation: {arguments: {intermediate_model: int_return_eligibility, key_column: return_id}}
+      - no_quarantined_product_keys
+    columns:
+      - {name: return_fact_key, description: Deterministic warehouse fact key., tests: [not_null, unique]}
+      - {name: return_id, description: Fact grain and source business key., tests: [not_null, unique]}
+      - {name: return_date_key, description: Return date dimension key., tests: [not_null, {relationships: {arguments: {to: ref('dim_date'), field: date_key}}}]}
+      - {name: customer_key, description: Customer dimension key from associated order., tests: [not_null, {relationships: {arguments: {to: ref('dim_customer'), field: customer_key}}}]}
+      - {name: warehouse_key, description: Warehouse dimension key from associated order., tests: [not_null, {relationships: {arguments: {to: ref('dim_warehouse'), field: warehouse_key}}}]}
+      - {name: product_key, description: Product version selected as of return date., tests: [not_null, {relationships: {arguments: {to: ref('dim_product'), field: product_key}}}]}
+      - {name: product_history_fallback, description: True when return date precedes all observed product versions., tests: [not_null]}
+      - {name: returned_quantity, description: Returned quantity., tests: [not_null]}
+      - {name: refund_amount, description: Refund amount., tests: [not_null]}
+      - {name: quality_status, description: Source quality classification., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING]}}}]}
+      - {name: upstream_order_quality_status, description: Quality state of the associated order line; quarantined order context remains visible without excluding an otherwise valid return., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING, QUARANTINED]}}}]}
+      - {name: upstream_order_quality_issues, description: Issue codes from the associated order line.}
+      - {name: upstream_order_batch_id, description: RAW ingestion batch for associated order context.}
+      - {name: batch_id, description: RAW ingestion batch identifier.}

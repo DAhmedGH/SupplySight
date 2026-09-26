@@ -1,0 +1,70 @@
+version: 2
+
+models:
+  - name: int_order_eligibility
+    description: Order-line eligibility for CORE. Warning rows remain eligible; quarantined or structurally unusable records receive an explicit exclusion reason.
+    columns:
+      - {name: order_line_id, description: Source order line key., tests: [not_null, unique]}
+      - {name: eligible_for_fact, description: Whether this row contributes to fact_orders., tests: [not_null]}
+      - {name: exclusion_reason, description: Auditable reason for exclusion; null for eligible records.}
+      - {name: selected_product_key, description: Product version selected using event date, or earliest observed version fallback.}
+      - {name: product_history_fallback, description: True when the event predates all observed product versions.}
+  - name: int_inventory_eligibility
+    description: Inventory snapshot eligibility for CORE. Quarantined positions are retained here and in exception reconciliation.
+    columns:
+      - {name: inventory_snapshot_key, description: Deterministic key for the source snapshot grain., tests: [not_null, unique]}
+      - {name: eligible_for_fact, description: Whether this row contributes to fact_inventory_snapshot., tests: [not_null]}
+      - {name: exclusion_reason, description: Auditable reason for exclusion; null for eligible records.}
+      - {name: selected_product_key, description: Product version selected using snapshot date, or earliest observed version fallback.}
+      - {name: product_history_fallback, description: True when the event predates all observed product versions.}
+  - name: int_purchase_order_eligibility
+    description: Purchase-order line eligibility for CORE with quality and dimension checks.
+    columns:
+      - {name: po_line_id, description: Source purchase-order line key., tests: [not_null, unique]}
+      - {name: eligible_for_fact, description: Whether this row contributes to fact_purchase_orders., tests: [not_null]}
+      - {name: exclusion_reason, description: Auditable reason for exclusion; null for eligible records.}
+      - {name: selected_product_key, description: Product version selected using purchase order date, or earliest observed version fallback.}
+      - {name: product_history_fallback, description: True when the event predates all observed product versions.}
+  - name: int_shipment_eligibility
+    description: Shipment eligibility plus order context from all staged order lines, including quarantined lines, so shipment context is not silently lost.
+    columns:
+      - {name: shipment_id, description: Source shipment key., tests: [not_null, unique]}
+      - {name: eligible_for_fact, description: Whether this row contributes to fact_shipments., tests: [not_null]}
+      - {name: exclusion_reason, description: Auditable reason for exclusion; null for eligible records.}
+      - {name: selected_product_key, description: Product version selected using ship date, or earliest observed version fallback.}
+      - {name: product_history_fallback, description: True when the event predates all observed product versions.}
+  - name: int_return_eligibility
+    description: Return event eligibility plus associated order context from staging.
+    columns:
+      - {name: return_id, description: Source return key., tests: [not_null, unique]}
+      - {name: eligible_for_fact, description: Whether this row contributes to fact_returns., tests: [not_null]}
+      - {name: exclusion_reason, description: Auditable reason for exclusion; null for eligible records.}
+      - {name: selected_product_key, description: Product version selected using return date, or earliest observed version fallback.}
+      - {name: product_history_fallback, description: True when the event predates all observed product versions.}
+  - name: int_fact_product_context
+    description: Resolves one product version active at the end of each event date using valid_from < next-day midnight and valid_to >= next-day midnight. If no version has been observed by then, chooses the earliest version and flags the fallback. Selected quality drives fact eligibility.
+    tests:
+      - unique_combination_of_columns: {arguments: {combination_of_columns: [source_entity, source_key]}}
+      - product_event_date_semantics
+    columns:
+      - {name: source_entity, description: Fact source entity., tests: [not_null, {accepted_values: {arguments: {values: [orders, inventory_snapshots, purchase_orders, shipments, returns]}}}]}
+      - {name: source_key, description: Source fact candidate key., tests: [not_null]}
+      - {name: selected_product_key, description: Product dimension version selected for this event., tests: [{relationships: {arguments: {to: ref('dim_product'), field: product_key}}}]}
+      - {name: event_date, description: Business event date used for end-of-day version selection.}
+      - {name: selected_product_valid_from, description: Selected SCD version start timestamp.}
+      - {name: selected_product_valid_to, description: Exclusive end timestamp for selected SCD version.}
+      - {name: selected_product_quality_status, description: Quality state of the selected product version.}
+      - {name: product_history_fallback, description: True when event date is before earliest observed version., tests: [not_null]}
+  - name: int_fact_quality_exceptions
+    description: One row for every staged fact candidate excluded from CORE, with source quality, reason, and ingestion lineage.
+    tests:
+      - quality_exception_reconciliation
+      - unique_combination_of_columns: {arguments: {combination_of_columns: [source_entity, source_key]}}
+    columns:
+      - {name: source_entity, description: Staging entity name., tests: [not_null]}
+      - {name: source_key, description: Source grain key rendered as text., tests: [not_null]}
+      - {name: exclusion_reason, description: Stable reason this row was excluded from its fact., tests: [not_null]}
+      - {name: quality_status, description: Original source quality classification., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING, QUARANTINED]}}}]}
+      - {name: quality_issues, description: Original source issue codes.}
+      - {name: selected_product_quality_status, description: Quality classification of the product version selected for the event date.}
+      - {name: batch_id, description: RAW ingestion batch identifier.}

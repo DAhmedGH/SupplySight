@@ -1,0 +1,74 @@
+table SalesMonth
+	lineageTag: 73e894a2-90af-4023-b672-01c38c4dc26b
+
+	column order_month
+		dataType: dateTime
+		isHidden
+		formatString: Long Date
+		lineageTag: db985e1b-eba4-4934-8372-a3a9873f2805
+		summarizeBy: none
+		sourceColumn: order_month
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column product_id
+		dataType: string
+		isHidden
+		lineageTag: 1cf57cf7-7248-4bca-b3fb-3f162eb0ec33
+		summarizeBy: none
+		sourceColumn: product_id
+
+	column warehouse_key
+		dataType: string
+		isHidden
+		lineageTag: bf264f42-4366-4de0-8c2d-50d65731b19b
+		summarizeBy: none
+		sourceColumn: warehouse_key
+
+	column ordered_quantity
+		dataType: double
+		isHidden
+		lineageTag: c7f209d4-8056-4c60-b35b-00905c884a2c
+		summarizeBy: sum
+		sourceColumn: ordered_quantity
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column revenue_amount
+		dataType: double
+		isHidden
+		lineageTag: 0906b991-788e-405d-8f71-d435f2c6b6e5
+		summarizeBy: none
+		sourceColumn: revenue_amount
+
+	column gross_profit_amount
+		dataType: double
+		isHidden
+		lineageTag: e33cc1e3-aaa8-4a63-a739-6152b40ad9cc
+		summarizeBy: none
+		sourceColumn: gross_profit_amount
+
+	column cost_of_goods_sold
+		dataType: double
+		isHidden
+		lineageTag: 75de7aa1-308b-4240-999e-7f41c107d638
+		summarizeBy: none
+		sourceColumn: cost_of_goods_sold
+
+	partition SalesMonth = m
+		mode: import
+		source =
+				let
+				    Raw = #"DevTable"("MARTS", "SALES_MONTHLY"),
+				    Selected = Table.SelectColumns(Raw, {"ORDER_MONTH", "PRODUCT_KEY", "WAREHOUSE_KEY", "ORDERED_QUANTITY", "REVENUE_AMOUNT", "GROSS_PROFIT_AMOUNT", "COST_OF_GOODS_SOLD"}),
+				    Lower = Table.TransformColumnNames(Selected, Text.Lower),
+				    Joined = Table.NestedJoin(Lower, {"product_key"}, #"ProductVersionLookup", {"product_key"}, "Version", JoinKind.LeftOuter),
+				    Expanded = Table.ExpandTableColumn(Joined, "Version", {"product_id"}, {"product_id"}),
+				    Result = Table.RemoveColumns(Expanded, {"product_key"})
+				in
+				    Result
+
+	annotation PBI_ResultType = Exception
+

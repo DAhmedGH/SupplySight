@@ -1,0 +1,142 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "series_validation_detail",
+  "position": {
+    "x": 1320,
+    "y": 280,
+    "z": 0,
+    "height": 500,
+    "width": 560,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Product"
+                    }
+                  },
+                  "Property": "sku"
+                }
+              },
+              "queryRef": "Product.sku",
+              "nativeQueryRef": "sku",
+              "displayName": "SKU"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Warehouse"
+                    }
+                  },
+                  "Property": "warehouse_name"
+                }
+              },
+              "queryRef": "Warehouse.warehouse_name",
+              "nativeQueryRef": "warehouse_name",
+              "displayName": "Warehouse"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Selected Test MAE"
+                }
+              },
+              "queryRef": "Report Measures.Selected Test MAE",
+              "nativeQueryRef": "Selected Test MAE",
+              "displayName": "Test MAE"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Selected Test RMSE"
+                }
+              },
+              "queryRef": "Report Measures.Selected Test RMSE",
+              "nativeQueryRef": "Selected Test RMSE",
+              "displayName": "Test RMSE"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Selected Test WAPE"
+                }
+              },
+              "queryRef": "Report Measures.Selected Test WAPE",
+              "nativeQueryRef": "Selected Test WAPE",
+              "displayName": "Test WAPE"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "columnHeaders": [
+        {
+          "properties": {
+            "columnAdjustment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'growToFit'"
+                }
+              }
+            },
+            "autoSizeColumnWidth": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Series Validation by SKU and Warehouse'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

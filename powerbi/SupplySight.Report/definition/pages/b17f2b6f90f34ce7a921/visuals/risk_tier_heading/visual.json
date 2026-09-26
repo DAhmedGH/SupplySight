@@ -1,0 +1,37 @@
+{
+  "position": {
+    "width": 400,
+    "y": 248,
+    "z": 10,
+    "x": 40,
+    "tabOrder": 0,
+    "height": 24
+  },
+  "name": "risk_tier_heading",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "textStyle": {
+                      "fontFamily": "Segoe UI",
+                      "fontWeight": "bold",
+                      "fontSize": "14pt"
+                    },
+                    "value": "Positions by Risk Tier"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

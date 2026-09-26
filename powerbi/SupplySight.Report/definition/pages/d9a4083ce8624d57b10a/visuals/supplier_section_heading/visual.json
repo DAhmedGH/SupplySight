@@ -1,0 +1,37 @@
+{
+  "position": {
+    "width": 900,
+    "y": 240,
+    "z": 10,
+    "x": 40,
+    "tabOrder": 0,
+    "height": 24
+  },
+  "name": "supplier_section_heading",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "textStyle": {
+                      "fontFamily": "Segoe UI",
+                      "fontWeight": "bold",
+                      "fontSize": "14pt"
+                    },
+                    "value": "Supplier procurement | spend by PO month; service by due month"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

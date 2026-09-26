@@ -1,0 +1,102 @@
+table ForecastRun
+	lineageTag: eea39a86-76f3-413b-b4dc-bfb0ae8e8d2f
+
+	column run_id
+		dataType: string
+		isHidden
+		lineageTag: 66f07fd1-fdba-4eac-9682-d235618c9826
+		summarizeBy: none
+		sourceColumn: run_id
+
+	column status
+		dataType: string
+		lineageTag: 0ef7877e-1b5a-4ac7-af65-f120f9b97ee5
+		summarizeBy: none
+		sourceColumn: status
+
+	column observed_through
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 409b7d73-23ad-4b81-a7d4-d82f0b0319e4
+		summarizeBy: none
+		sourceColumn: observed_through
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column horizon
+		dataType: double
+		lineageTag: c3ce5e62-652b-45a8-bf29-f6e630ef1c6f
+		summarizeBy: sum
+		sourceColumn: horizon
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column series_attempted
+		dataType: double
+		isHidden
+		lineageTag: 49818f40-a534-41f4-86ca-e24ca0be1a41
+		summarizeBy: sum
+		sourceColumn: series_attempted
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column series_succeeded
+		dataType: double
+		isHidden
+		lineageTag: 3a2649b3-f6fd-4f6c-9097-411a04364c40
+		summarizeBy: sum
+		sourceColumn: series_succeeded
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column series_fallback
+		dataType: double
+		isHidden
+		lineageTag: 531420b3-c638-4fbf-a288-6d738d60a27f
+		summarizeBy: sum
+		sourceColumn: series_fallback
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column series_failed
+		dataType: double
+		isHidden
+		lineageTag: 28b9fd01-c24d-4235-be84-f93ea956c787
+		summarizeBy: sum
+		sourceColumn: series_failed
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column records_produced
+		dataType: double
+		isHidden
+		lineageTag: b5f97c88-b2f5-4a82-a10d-f08d475f3ef9
+		summarizeBy: sum
+		sourceColumn: records_produced
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition ForecastRun = m
+		mode: import
+		source =
+				let
+				    RunId = #"ScenarioRunId",
+				    Raw = #"DevTable"("FORECASTING", "RUN_METADATA"),
+				    Filtered = Table.SelectRows(Raw, each [RUN_ID] = RunId),
+				    Selected = Table.SelectColumns(Filtered, {"RUN_ID", "STATUS", "OBSERVED_THROUGH", "HORIZON", "SERIES_ATTEMPTED", "SERIES_SUCCEEDED", "SERIES_FALLBACK", "SERIES_FAILED", "RECORDS_PRODUCED"}),
+				    Result = Table.TransformColumnNames(Selected, Text.Lower)
+				in
+				    Result
+

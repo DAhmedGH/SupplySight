@@ -1,0 +1,99 @@
+table LogisticsMonth
+	lineageTag: cee7a58c-0084-4993-8f6c-6a3b9089f6ff
+
+	column ship_month
+		dataType: dateTime
+		isHidden
+		formatString: Long Date
+		lineageTag: 9c7a1d91-4f1c-4d42-b720-8476d39837d7
+		summarizeBy: none
+		sourceColumn: ship_month
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column carrier_key
+		dataType: string
+		isHidden
+		lineageTag: 2ff47648-5dc0-40dd-b66b-d9c4580aed22
+		summarizeBy: none
+		sourceColumn: carrier_key
+
+	column warehouse_key
+		dataType: string
+		isHidden
+		lineageTag: cd6e2a24-fca6-4bf2-97e4-a689c1154ef8
+		summarizeBy: none
+		sourceColumn: warehouse_key
+
+	column shipment_count
+		dataType: double
+		isHidden
+		lineageTag: c5b18228-907d-4dc2-a1f0-2391f4946038
+		summarizeBy: sum
+		sourceColumn: shipment_count
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column shipped_quantity
+		dataType: double
+		isHidden
+		lineageTag: 192ff86c-1e8c-4e73-bff9-0b8ebf72902f
+		summarizeBy: sum
+		sourceColumn: shipped_quantity
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column completed_shipment_count
+		dataType: double
+		isHidden
+		lineageTag: dbcf83dd-46de-447c-94ab-e16a23de7ea2
+		summarizeBy: sum
+		sourceColumn: completed_shipment_count
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column on_time_shipment_count
+		dataType: double
+		isHidden
+		lineageTag: 9172e51b-19e7-42f3-b2d5-540ebaf5a932
+		summarizeBy: sum
+		sourceColumn: on_time_shipment_count
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column timeliness_eligible_count
+		dataType: double
+		isHidden
+		lineageTag: dfec3631-6543-4a2e-996c-e526280593ea
+		summarizeBy: sum
+		sourceColumn: timeliness_eligible_count
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column average_transit_days
+		dataType: double
+		isHidden
+		lineageTag: 88f5e4e8-94ec-4721-a000-242f5f8d37f4
+		summarizeBy: none
+		sourceColumn: average_transit_days
+
+	partition LogisticsMonth = m
+		mode: import
+		source =
+				let
+				    Raw = #"DevTable"("MARTS", "LOGISTICS_MONTHLY"),
+				    Selected = Table.SelectColumns(Raw, {"SHIP_MONTH", "CARRIER_KEY", "WAREHOUSE_KEY", "SHIPMENT_COUNT", "SHIPPED_QUANTITY", "COMPLETED_SHIPMENT_COUNT", "ON_TIME_SHIPMENT_COUNT", "TIMELINESS_ELIGIBLE_COUNT", "AVERAGE_TRANSIT_DAYS"}),
+				    Lower = Table.TransformColumnNames(Selected, Text.Lower)
+				in
+				    Lower
+

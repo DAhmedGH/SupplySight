@@ -1,0 +1,136 @@
+relationship f3907303-dde1-57fd-9f35-e8f3ef3eba03
+	fromColumn: SalesMonth.order_month
+	toColumn: CalendarMonth.month_start
+
+relationship 5528b075-153f-535e-a42d-6e08649fd763
+	fromColumn: InventoryMonth.month_start
+	toColumn: CalendarMonth.month_start
+
+relationship 306fc532-5cf2-58f5-a376-cf36b98a4495
+	fromColumn: SupplierSpendMonth.month_start
+	toColumn: CalendarMonth.month_start
+
+relationship 3cf3456e-713a-518a-a5bc-2d9937d32786
+	fromColumn: SupplierServiceMonth.month_start
+	toColumn: CalendarMonth.month_start
+
+relationship b4498098-3619-52da-a961-4ada075c6220
+	fromColumn: SupplierLine.due_month
+	toColumn: CalendarMonth.month_start
+
+relationship 07f9cd53-d58e-51f3-a8f9-91fe2dcc7f0c
+	fromColumn: LogisticsMonth.ship_month
+	toColumn: CalendarMonth.month_start
+
+relationship 4d7abb0d-6dc7-5442-906b-9b1126b55c48
+	fromColumn: ForecastMonth.forecast_date
+	toColumn: CalendarMonth.month_start
+
+relationship 49b4e6f9-de5d-51b0-8867-79f8afa5e16b
+	fromColumn: PlanningMonth.forecast_month
+	toColumn: CalendarMonth.month_start
+
+relationship 85d05b9a-1d7d-5359-82f9-d3772097237c
+	fromColumn: SalesMonth.product_id
+	toColumn: Product.product_id
+
+relationship 5923e0a1-27c8-5516-a048-412c187d820a
+	fromColumn: InventoryMonth.product_id
+	toColumn: Product.product_id
+
+relationship c43e8ed0-4506-5ff2-8fe5-eadf2c4c667b
+	fromColumn: ForecastMonth.product_id
+	toColumn: Product.product_id
+
+relationship dc1c7029-c6a0-5670-b353-fe2645b7b953
+	fromColumn: ForecastEvaluation.product_id
+	toColumn: Product.product_id
+
+relationship a4bbd07a-7e4c-5a75-a053-e545f3275095
+	fromColumn: PlanningMonth.product_id
+	toColumn: Product.product_id
+
+relationship 27594a31-59d4-5836-9db7-00b0fa44b135
+	fromColumn: Recommendation.product_id
+	toColumn: Product.product_id
+
+relationship 074d6ace-cf6c-5eaf-b807-415515aa4ecc
+	fromColumn: Transfer.product_id
+	toColumn: Product.product_id
+
+relationship 44d1703f-2501-5f84-9e36-c42a3f81a6dd
+	fromColumn: SalesMonth.warehouse_key
+	toColumn: Warehouse.warehouse_key
+
+relationship e1250b08-910a-5b7a-b8fc-3d17bfbaa381
+	fromColumn: InventoryMonth.warehouse_key
+	toColumn: Warehouse.warehouse_key
+
+relationship 9abc2bbb-8317-5277-8243-15f4fc17fa93
+	fromColumn: LogisticsMonth.warehouse_key
+	toColumn: Warehouse.warehouse_key
+
+relationship e2fa8343-f2e1-5c57-80b8-64bef0c5d20b
+	fromColumn: ForecastMonth.warehouse_key
+	toColumn: Warehouse.warehouse_key
+
+relationship 276fdf3a-2f23-5f43-b153-544c3e2c3d14
+	fromColumn: ForecastEvaluation.warehouse_key
+	toColumn: Warehouse.warehouse_key
+
+relationship 7238b793-739d-592a-968b-2e2593951b76
+	fromColumn: PlanningMonth.warehouse_key
+	toColumn: Warehouse.warehouse_key
+
+relationship 60902463-9f2d-5708-b9a6-2e2b8b38e80a
+	fromColumn: Recommendation.warehouse_key
+	toColumn: Warehouse.warehouse_key
+
+relationship 74b2dd98-1727-5c2b-9023-36a8b3aa64d5
+	fromColumn: Transfer.destination_warehouse_key
+	toColumn: Warehouse.warehouse_key
+
+relationship 7d417839-09fd-5ad6-aad3-c30ab363e446
+	fromColumn: Transfer.source_warehouse_key
+	toColumn: SourceWarehouse.warehouse_key
+
+relationship 38d6f3b3-2f20-5fb7-a283-15f85ca97646
+	fromColumn: SupplierSpendMonth.supplier_key
+	toColumn: Supplier.supplier_key
+
+relationship 284528af-0657-588f-877e-26c143c5b3b3
+	fromColumn: SupplierServiceMonth.supplier_key
+	toColumn: Supplier.supplier_key
+
+relationship 4e48533c-9ec3-523d-abbb-3e5ce675cdbd
+	fromColumn: SupplierLine.supplier_key
+	toColumn: Supplier.supplier_key
+
+relationship d2e6d76c-8902-5506-ba73-2e9cf848efd3
+	fromColumn: Recommendation.selected_supplier_key
+	toColumn: Supplier.supplier_key
+
+relationship 44d51000-c2d1-56db-81cb-d4c791b33016
+	fromColumn: LogisticsMonth.carrier_key
+	toColumn: Carrier.carrier_key
+
+relationship c5d3f7d6-ee41-5c89-8748-787d5845dff1
+	fromColumn: ForecastMonth.run_id
+	toColumn: ForecastRun.run_id
+
+relationship 5dd6ed6d-0a91-5abb-afac-bf8cf00d9869
+	fromColumn: ForecastEvaluation.run_id
+	toColumn: ForecastRun.run_id
+
+relationship 51f79a84-c1ac-5daa-a143-f94d4fe6a2bd
+	fromColumn: PlanningMonth.forecast_run_id
+	toColumn: ForecastRun.run_id
+
+relationship 0637c770-8c17-513b-9b77-a0b7026f8afa
+	fromColumn: Recommendation.forecast_run_id
+	toColumn: ForecastRun.run_id
+
+relationship fa8527b6-dec0-55c9-b8a8-36649d45cf4d
+	fromColumn: Transfer.forecast_run_id
+	toColumn: ForecastRun.run_id
+

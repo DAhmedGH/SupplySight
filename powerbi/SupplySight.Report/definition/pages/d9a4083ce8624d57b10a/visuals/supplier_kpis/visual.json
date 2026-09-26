@@ -1,0 +1,93 @@
+{
+  "position": {
+    "width": 1840,
+    "y": 128,
+    "z": 0,
+    "x": 40,
+    "tabOrder": 0,
+    "height": 104
+  },
+  "name": "supplier_kpis",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Supplier Spend"
+                }
+              },
+              "nativeQueryRef": "Supplier Spend",
+              "queryRef": "Report Measures.Supplier Spend"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Supplier OTIF %"
+                }
+              },
+              "nativeQueryRef": "Supplier OTIF %",
+              "queryRef": "Report Measures.Supplier OTIF %"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Supplier Fill Rate %"
+                }
+              },
+              "nativeQueryRef": "Supplier Fill Rate %",
+              "queryRef": "Report Measures.Supplier Fill Rate %"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Average Lead Time Days"
+                }
+              },
+              "nativeQueryRef": "Average Lead Time Days",
+              "queryRef": "Report Measures.Average Lead Time Days"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Late Due PO Lines"
+                }
+              },
+              "nativeQueryRef": "Late Due PO Lines",
+              "queryRef": "Report Measures.Late Due PO Lines"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

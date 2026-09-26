@@ -1,0 +1,88 @@
+table PlanningMonth
+	lineageTag: 7dfc125e-e2d2-4f2d-b2cb-8343a7baef3c
+
+	column forecast_run_id
+		dataType: string
+		isHidden
+		lineageTag: a87bb192-25d5-4835-a4d1-dd4255d0a007
+		summarizeBy: none
+		sourceColumn: forecast_run_id
+
+	column product_id
+		dataType: string
+		isHidden
+		lineageTag: 52244795-d98f-441f-8216-52bbe4b7da9c
+		summarizeBy: none
+		sourceColumn: product_id
+
+	column warehouse_key
+		dataType: string
+		isHidden
+		lineageTag: 66992c36-07f5-483a-9d74-23a4d3552179
+		summarizeBy: none
+		sourceColumn: warehouse_key
+
+	column forecast_month
+		dataType: dateTime
+		isHidden
+		formatString: Long Date
+		lineageTag: f3bc90b1-2c53-488d-9944-3cc0aa5af1c0
+		summarizeBy: none
+		sourceColumn: forecast_month
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column point_demand_units
+		dataType: double
+		lineageTag: c42c1f22-c8cf-433c-a8be-9713e455467c
+		summarizeBy: none
+		sourceColumn: point_demand_units
+
+	column upper_demand_units
+		dataType: double
+		lineageTag: 620ad070-5e4b-4277-89d2-d40c46cbdae3
+		summarizeBy: none
+		sourceColumn: upper_demand_units
+
+	column scheduled_inbound_units
+		dataType: double
+		lineageTag: 6c111739-5f10-4909-89fe-61b6e6f66a2e
+		summarizeBy: none
+		sourceColumn: scheduled_inbound_units
+
+	column opening_point_inventory
+		dataType: double
+		lineageTag: 171aee03-3e74-42ec-92c3-0d2128ee41d7
+		summarizeBy: none
+		sourceColumn: opening_point_inventory
+
+	column closing_point_inventory
+		dataType: double
+		lineageTag: c3133341-d04a-4c08-9e65-2d66a49a9850
+		summarizeBy: none
+		sourceColumn: closing_point_inventory
+
+	column opening_stress_inventory
+		dataType: double
+		lineageTag: e078c863-af54-4d70-9419-867ed9ba4cf0
+		summarizeBy: none
+		sourceColumn: opening_stress_inventory
+
+	column closing_stress_inventory
+		dataType: double
+		lineageTag: f3db1a33-8a24-46c7-b1d8-c29afb773801
+		summarizeBy: none
+		sourceColumn: closing_stress_inventory
+
+	partition PlanningMonth = m
+		mode: import
+		source =
+				let
+				    RunId = #"ScenarioRunId",
+				    Raw = #"DevTable"("MARTS", "MART_INVENTORY_PLANNING_MONTHLY"),
+				    Filtered = Table.SelectRows(Raw, each [FORECAST_RUN_ID] = RunId),
+				    Selected = Table.SelectColumns(Filtered, {"FORECAST_RUN_ID", "PRODUCT_ID", "WAREHOUSE_KEY", "FORECAST_MONTH", "POINT_DEMAND_UNITS", "UPPER_DEMAND_UNITS", "SCHEDULED_INBOUND_UNITS", "OPENING_POINT_INVENTORY", "CLOSING_POINT_INVENTORY", "OPENING_STRESS_INVENTORY", "CLOSING_STRESS_INVENTORY"}),
+				    Result = Table.TransformColumnNames(Selected, Text.Lower)
+				in
+				    Result
+

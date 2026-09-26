@@ -1,0 +1,37 @@
+{
+  "position": {
+    "width": 1180,
+    "y": 70,
+    "z": 1,
+    "x": 40,
+    "tabOrder": 0,
+    "height": 32
+  },
+  "name": "header_subtitle",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "textStyle": {
+                      "fontFamily": "Segoe UI",
+                      "fontWeight": "regular",
+                      "fontSize": "12pt"
+                    },
+                    "value": "2024 actuals | historical planning scenario remains fixed at the Dec 31, 2024 cutoff"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

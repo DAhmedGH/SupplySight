@@ -1,0 +1,156 @@
+table Recommendation
+	lineageTag: 609d03fb-5ec1-48a9-92fe-478753699565
+
+	column forecast_run_id
+		dataType: string
+		isHidden
+		lineageTag: 0053741b-c4b6-4215-9f40-24a48bf39f6f
+		summarizeBy: none
+		sourceColumn: forecast_run_id
+
+	column planning_cutoff
+		dataType: dateTime
+		isHidden
+		formatString: Long Date
+		lineageTag: a51910b5-42af-427c-b042-fb9be351bd82
+		summarizeBy: none
+		sourceColumn: planning_cutoff
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column product_id
+		dataType: string
+		isHidden
+		lineageTag: 98eae388-23d6-4732-a202-d22051b829a6
+		summarizeBy: none
+		sourceColumn: product_id
+
+	column warehouse_key
+		dataType: string
+		isHidden
+		lineageTag: 9ab949c1-4e1e-4876-a3b3-a7c4dca9cb28
+		summarizeBy: none
+		sourceColumn: warehouse_key
+
+	column selected_supplier_key
+		dataType: string
+		isHidden
+		lineageTag: 7fdc21d3-df48-4af8-a7c4-53aeebb8b1f0
+		summarizeBy: none
+		sourceColumn: selected_supplier_key
+
+	column selected_supplier_id
+		dataType: string
+		lineageTag: 3f320fc5-b5c2-4b50-b21a-f6cabcda8bb1
+		summarizeBy: none
+		sourceColumn: selected_supplier_id
+
+	column stockout_risk_tier
+		dataType: string
+		lineageTag: b890fb3c-0b05-4f6c-9401-0416ed6cbe11
+		summarizeBy: none
+		sourceColumn: stockout_risk_tier
+		sortByColumn: risk_tier_sort
+
+	column risk_assessable
+		dataType: boolean
+		lineageTag: 28d9afd0-b070-44f7-be8d-2c5d89ea3070
+		summarizeBy: none
+		sourceColumn: risk_assessable
+
+	column available_units
+		dataType: double
+		lineageTag: b7e3e1ee-6108-4091-a213-75417e593202
+		summarizeBy: none
+		sourceColumn: available_units
+
+	column expected_shortage_units
+		dataType: double
+		isHidden
+		lineageTag: 93e6837c-ae32-43e5-9672-918d7f10a01a
+		summarizeBy: none
+		sourceColumn: expected_shortage_units
+
+	column stressed_shortage_units
+		dataType: double
+		isHidden
+		lineageTag: 27a4f624-da45-48be-bc7b-ae3ceba0afc5
+		summarizeBy: none
+		sourceColumn: stressed_shortage_units
+
+	column first_expected_shortage_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: ae14e532-bdba-47ab-a315-c06233314a65
+		summarizeBy: none
+		sourceColumn: first_expected_shortage_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column first_stressed_shortage_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 750b1a90-012c-4aee-a26b-1d1efbad8207
+		summarizeBy: none
+		sourceColumn: first_stressed_shortage_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column suggested_reorder_units
+		dataType: double
+		isHidden
+		lineageTag: b2a9377c-e215-4ee3-a0d6-a9bb23ec9537
+		summarizeBy: none
+		sourceColumn: suggested_reorder_units
+
+	column reorder_unavailable_reason
+		dataType: string
+		lineageTag: 2bbb1da1-1f63-464f-adc9-ebcdd58e4860
+		summarizeBy: none
+		sourceColumn: reorder_unavailable_reason
+
+	column immediate_mitigation_flag
+		dataType: boolean
+		lineageTag: 56a770a0-5c40-42f9-8f78-1c037917d6c1
+		summarizeBy: none
+		sourceColumn: immediate_mitigation_flag
+
+	column scheduled_inbound_units_total
+		dataType: double
+		isHidden
+		lineageTag: 557b4530-fd73-4e69-9a44-1820aeae9087
+		summarizeBy: none
+		sourceColumn: scheduled_inbound_units_total
+
+	column potential_revenue_exposure
+		dataType: double
+		isHidden
+		lineageTag: 40f1a8c7-3dc9-48fa-898f-4785955ffd4b
+		summarizeBy: none
+		sourceColumn: potential_revenue_exposure
+
+	column risk_tier_sort
+		dataType: int64
+		isHidden
+		lineageTag: 872de89e-54fb-458c-b751-75c23a51b1fd
+		summarizeBy: none
+		sourceColumn: risk_tier_sort
+
+	partition Recommendation = m
+		mode: import
+		source =
+				let
+				    RunId = #"ScenarioRunId",
+				    Raw = #"DevTable"("MARTS", "MART_INVENTORY_RECOMMENDATIONS"),
+				    Filtered = Table.SelectRows(Raw, each [FORECAST_RUN_ID] = RunId),
+				    Selected = Table.SelectColumns(Filtered, {"FORECAST_RUN_ID", "PLANNING_CUTOFF", "PRODUCT_ID", "WAREHOUSE_KEY", "SELECTED_SUPPLIER_KEY", "SELECTED_SUPPLIER_ID", "STOCKOUT_RISK_TIER", "RISK_ASSESSABLE", "AVAILABLE_UNITS", "EXPECTED_SHORTAGE_UNITS", "STRESSED_SHORTAGE_UNITS", "FIRST_EXPECTED_SHORTAGE_DATE", "FIRST_STRESSED_SHORTAGE_DATE", "SUGGESTED_REORDER_UNITS", "REORDER_UNAVAILABLE_REASON", "IMMEDIATE_MITIGATION_FLAG", "SCHEDULED_INBOUND_UNITS_TOTAL", "POTENTIAL_REVENUE_EXPOSURE"}),
+				    Renamed = Table.TransformColumnNames(Selected, Text.Lower),
+				    Result = Table.AddColumn(Renamed, "risk_tier_sort", each
+				        if [stockout_risk_tier] = "CRITICAL" then 1
+				        else if [stockout_risk_tier] = "HIGH" then 2
+				        else if [stockout_risk_tier] = "MEDIUM" then 3
+				        else if [stockout_risk_tier] = "LOW" then 4
+				        else 5, Int64.Type)
+				in
+				    Result
+

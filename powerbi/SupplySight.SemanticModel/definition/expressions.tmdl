@@ -1,0 +1,86 @@
+expression SnowflakeServer = "KXTOKVR-NA90673.snowflakecomputing.com" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 7edf5d18-daf3-48ad-9136-c6e322e5a532
+
+	annotation PBI_ResultType = Text
+
+expression DevTable =
+		(schemaName as text, tableName as text) as table =>
+		    let
+		        ServerName = #"SnowflakeServer",
+		        Checked = if ServerName = "CONFIGURE_DEV_SNOWFLAKE_SERVER" or Text.Trim(ServerName) = ""
+		            then error Error.Record("Configuration", "Set SnowflakeServer to the DEV account host in Power BI Desktop.", null)
+		            else ServerName,
+		        Source = Snowflake.Databases(Checked, "SUPPLY_CHAIN_DEV_WH"),
+		        Database = Source{[Name="SUPPLY_CHAIN_DEV", Kind="Database"]}[Data],
+		        Schema = Database{[Name=schemaName, Kind="Schema"]}[Data],
+		        Result = Schema{[Name=tableName, Kind="Table"]}[Data]
+		    in
+		        Result
+	lineageTag: 5d6d4cef-196d-497f-a486-47470bad90ba
+
+expression ProductVersionLookup =
+		let
+		    Raw = #"DevTable"("CORE", "DIM_PRODUCT"),
+		    Selected = Table.SelectColumns(Raw, {"PRODUCT_KEY", "PRODUCT_ID"}),
+		    Result = Table.TransformColumnNames(Selected, Text.Lower)
+		in
+		    Result
+	lineageTag: 6f6b36da-eb19-4dc5-abd7-8fa24ab7f8b5
+
+expression ScenarioRunId =
+		let
+		    Forecast = Table.SelectColumns(#"DevTable"("FORECASTING", "CURRENT_FORECASTS"), {"RUN_ID", "FORECAST_DATE", "PRODUCT_ID", "WAREHOUSE_KEY"}),
+		    Metadata = Table.SelectColumns(#"DevTable"("FORECASTING", "RUN_METADATA"), {"RUN_ID", "STATUS", "OBSERVED_THROUGH", "HORIZON"}),
+		    Planning = Table.SelectColumns(#"DevTable"("MARTS", "MART_INVENTORY_PLANNING_MONTHLY"), {"FORECAST_RUN_ID", "PLANNING_CUTOFF", "FORECAST_MONTH", "PRODUCT_ID", "WAREHOUSE_KEY"}),
+		    Recommendation = Table.SelectColumns(#"DevTable"("MARTS", "MART_INVENTORY_RECOMMENDATIONS"), {"FORECAST_RUN_ID", "PLANNING_CUTOFF", "PRODUCT_ID", "WAREHOUSE_KEY"}),
+		    Evaluation = Table.SelectColumns(#"DevTable"("FORECASTING", "MODEL_EVALUATION"), {"RUN_ID", "PRODUCT_ID", "WAREHOUSE_KEY"}),
+		    Transfers = Table.SelectColumns(#"DevTable"("MARTS", "MART_INVENTORY_TRANSFERS"), {"FORECAST_RUN_ID", "PLANNING_CUTOFF"}),
+		    ForecastRuns = List.Distinct(Forecast[RUN_ID]),
+		    RunId = if List.Count(ForecastRuns) = 1 then ForecastRuns{0} else null,
+		    RunRows = if RunId <> null then Table.SelectRows(Metadata, each [RUN_ID] = RunId) else #table({}, {}),
+		    MetadataValid = Table.RowCount(RunRows) = 1
+		        and RunRows{0}[STATUS] = "SUCCEEDED"
+		        and Date.From(RunRows{0}[OBSERVED_THROUGH]) = #date(2024, 12, 31)
+		        and RunRows{0}[HORIZON] = 3,
+		    ForecastMonths = List.Sort(List.Distinct(List.Transform(Forecast[FORECAST_DATE], each Date.From(_)))),
+		    PlanningMonths = List.Sort(List.Distinct(List.Transform(Planning[FORECAST_MONTH], each Date.From(_)))),
+		    ExpectedMonths = {#date(2025, 1, 1), #date(2025, 2, 1), #date(2025, 3, 1)},
+		    ForecastSeries = Table.Group(Forecast, {"RUN_ID", "PRODUCT_ID", "WAREHOUSE_KEY"},
+		        {{"MonthCount", each List.Count(List.Distinct([FORECAST_DATE])), Int64.Type}, {"RowCount", each Table.RowCount(_), Int64.Type}}),
+		    PlanningSeries = Table.Group(Planning, {"FORECAST_RUN_ID", "PRODUCT_ID", "WAREHOUSE_KEY"},
+		        {{"MonthCount", each List.Count(List.Distinct([FORECAST_MONTH])), Int64.Type}, {"RowCount", each Table.RowCount(_), Int64.Type}}),
+		    KeyRows = (input as table) as list =>
+		        Table.ToRows(Table.Sort(Table.Distinct(Table.SelectColumns(input, {"PRODUCT_ID", "WAREHOUSE_KEY"})),
+		            {{"PRODUCT_ID", Order.Ascending}, {"WAREHOUSE_KEY", Order.Ascending}})),
+		    ForecastKeys = KeyRows(ForecastSeries),
+		    PlanningKeys = KeyRows(PlanningSeries),
+		    RecommendationKeys = KeyRows(Recommendation),
+		    EvaluationKeys = KeyRows(Evaluation),
+		    SeriesKeysValid = ForecastKeys = PlanningKeys
+		        and ForecastKeys = RecommendationKeys and ForecastKeys = EvaluationKeys,
+		    ForecastSeriesValid = Table.RowCount(ForecastSeries) > 0
+		        and List.AllTrue(List.Transform(Table.ToRecords(ForecastSeries), each [MonthCount] = 3 and [RowCount] = 3)),
+		    PlanningSeriesValid = Table.RowCount(PlanningSeries) > 0
+		        and List.AllTrue(List.Transform(Table.ToRecords(PlanningSeries), each [MonthCount] = 3 and [RowCount] = 3)),
+		    MonthsValid = ForecastMonths = ExpectedMonths and PlanningMonths = ExpectedMonths
+		        and ForecastSeriesValid and PlanningSeriesValid,
+		    PlanningValid = Table.RowCount(Planning) > 0 and List.Distinct(Planning[FORECAST_RUN_ID]) = {RunId}
+		        and List.AllTrue(List.Transform(Planning[PLANNING_CUTOFF], each Date.From(_) = #date(2024, 12, 31))),
+		    RecommendationsValid = Table.RowCount(Recommendation) > 0
+		        and List.Distinct(Recommendation[FORECAST_RUN_ID]) = {RunId}
+		        and List.AllTrue(List.Transform(Recommendation[PLANNING_CUTOFF], each Date.From(_) = #date(2024, 12, 31))),
+		    EvaluationValid = Table.RowCount(Evaluation) > 0 and List.Distinct(Evaluation[RUN_ID]) = {RunId},
+		    TransfersValid = Table.RowCount(Transfers) = 0 or
+		        (List.Distinct(Transfers[FORECAST_RUN_ID]) = {RunId}
+		        and List.AllTrue(List.Transform(Transfers[PLANNING_CUTOFF], each Date.From(_) = #date(2024, 12, 31)))),
+		    Valid = RunId <> null and Table.RowCount(Forecast) > 0 and MetadataValid and MonthsValid
+		        and PlanningValid and RecommendationsValid and EvaluationValid and TransfersValid
+		        and SeriesKeysValid,
+		    Result = if Valid then RunId
+		        else error Error.Record("HistoricalScenarioMismatch",
+		            "Forecast/current run is incompatible with the fixed Dec 2024 planning scenario; refresh stopped.",
+		            [ExpectedCutoff = "2024-12-31", ExpectedHorizon = "2025-01 through 2025-03"])
+		in
+		    Result
+	lineageTag: c32054a8-14cf-4bfc-a58b-35a2fdded2ff
+

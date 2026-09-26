@@ -1,0 +1,107 @@
+{
+  "position": {
+    "width": 1840,
+    "y": 128,
+    "z": 0,
+    "x": 40,
+    "tabOrder": 0,
+    "height": 128
+  },
+  "name": "business_kpis",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Revenue"
+                }
+              },
+              "nativeQueryRef": "Revenue",
+              "queryRef": "Report Measures.Revenue"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Gross Profit"
+                }
+              },
+              "nativeQueryRef": "Gross Profit",
+              "queryRef": "Report Measures.Gross Profit"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Gross Margin %"
+                }
+              },
+              "nativeQueryRef": "Gross Margin %",
+              "queryRef": "Report Measures.Gross Margin %"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Month-end Inventory Value"
+                }
+              },
+              "nativeQueryRef": "Month-end Inventory Value",
+              "queryRef": "Report Measures.Month-end Inventory Value"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Supplier OTIF %"
+                }
+              },
+              "nativeQueryRef": "Supplier OTIF %",
+              "queryRef": "Report Measures.Supplier OTIF %"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Report Measures"
+                    }
+                  },
+                  "Property": "Trailing 90d Inventory Turnover"
+                }
+              },
+              "nativeQueryRef": "Trailing 90d Inventory Turnover",
+              "queryRef": "Report Measures.Trailing 90d Inventory Turnover"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "SupplySight"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "b49e63b7-cfa0-409d-8fa8-749eab364f85"
+  }
+}

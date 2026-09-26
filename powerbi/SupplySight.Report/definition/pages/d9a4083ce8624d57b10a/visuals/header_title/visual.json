@@ -1,0 +1,37 @@
+{
+  "position": {
+    "width": 1180,
+    "y": 16,
+    "z": 1,
+    "x": 40,
+    "tabOrder": 0,
+    "height": 52
+  },
+  "name": "header_title",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "textStyle": {
+                      "fontFamily": "Segoe UI",
+                      "fontWeight": "bold",
+                      "fontSize": "26pt"
+                    },
+                    "value": "2024 Supplier & Logistics Performance"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
