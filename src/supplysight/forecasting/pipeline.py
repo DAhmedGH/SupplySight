@@ -194,8 +194,8 @@ def run_forecast(
 ) -> ForecastRun:
     """Forecast each product/warehouse series from eligible monthly order demand."""
     started = generated_at or datetime.now(timezone.utc)
-    if horizon < 1:
-        raise ValueError("horizon must be positive")
+    if horizon != 3:
+        raise ValueError("V1 requires a three-month forecast horizon (horizon=3)")
     if observed_through is None or coverage_start is None:
         raise ValueError("observed_through and coverage_start must be explicit")
     _validate_month_bounds(coverage_start, observed_through)

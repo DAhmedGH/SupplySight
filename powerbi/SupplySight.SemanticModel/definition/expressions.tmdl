@@ -33,10 +33,11 @@ expression ScenarioRunId =
 		    Metadata = Table.SelectColumns(#"DevTable"("FORECASTING", "RUN_METADATA"), {"RUN_ID", "STATUS", "OBSERVED_THROUGH", "HORIZON"}),
 		    Planning = Table.SelectColumns(#"DevTable"("MARTS", "MART_INVENTORY_PLANNING_MONTHLY"), {"FORECAST_RUN_ID", "PLANNING_CUTOFF", "FORECAST_MONTH", "PRODUCT_ID", "WAREHOUSE_KEY"}),
 		    Recommendation = Table.SelectColumns(#"DevTable"("MARTS", "MART_INVENTORY_RECOMMENDATIONS"), {"FORECAST_RUN_ID", "PLANNING_CUTOFF", "PRODUCT_ID", "WAREHOUSE_KEY"}),
-		    Evaluation = Table.SelectColumns(#"DevTable"("FORECASTING", "MODEL_EVALUATION"), {"RUN_ID", "PRODUCT_ID", "WAREHOUSE_KEY"}),
+		    EvaluationHistory = Table.SelectColumns(#"DevTable"("FORECASTING", "MODEL_EVALUATION"), {"RUN_ID", "PRODUCT_ID", "WAREHOUSE_KEY"}),
 		    Transfers = Table.SelectColumns(#"DevTable"("MARTS", "MART_INVENTORY_TRANSFERS"), {"FORECAST_RUN_ID", "PLANNING_CUTOFF"}),
 		    ForecastRuns = List.Distinct(Forecast[RUN_ID]),
 		    RunId = if List.Count(ForecastRuns) = 1 then ForecastRuns{0} else null,
+		    Evaluation = Table.SelectRows(EvaluationHistory, each [RUN_ID] = RunId),
 		    RunRows = if RunId <> null then Table.SelectRows(Metadata, each [RUN_ID] = RunId) else #table({}, {}),
 		    MetadataValid = Table.RowCount(RunRows) = 1
 		        and RunRows{0}[STATUS] = "SUCCEEDED"

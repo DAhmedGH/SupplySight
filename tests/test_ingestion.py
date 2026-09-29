@@ -21,8 +21,52 @@ from supplysight.ingestion.pipeline import (
     _verify_file_manifest,
     ingest_dataset,
 )
-from supplysight.ingestion.preflight import PreflightError, preflight_dataset
+from supplysight.ingestion.preflight import (
+    PreflightError,
+    _valid_value,
+    preflight_dataset,
+)
 from supplysight.settings import ConfigurationError, SnowflakeSettings
+
+
+@pytest.mark.parametrize("field", ["on_time_rate", "quality_rate"])
+@pytest.mark.parametrize(
+    ("value", "valid"),
+    [
+        ("0", True),
+        ("1", True),
+        ("0.875", True),
+        (".25", True),
+        ("-0.1", False),
+        ("1.01", False),
+        ("not-a-decimal", False),
+        ("1e-1", False),
+        ("0.1234567890123456789", False),
+    ],
+)
+def test_supplier_rates_are_bounded_valid_decimals(field, value, valid):
+    assert _valid_value("suppliers", field, value) is valid
+
+
+@pytest.mark.parametrize("value", ["True", "False", "true", "false"])
+def test_boolean_contract_accepts_generated_and_lowercase_values(value):
+    assert _valid_value("suppliers", "active_flag", value)
+
+
+@pytest.mark.parametrize("value", ["TRUE", "1", ""])
+def test_boolean_contract_rejects_unsupported_values(value):
+    assert not _valid_value("suppliers", "active_flag", value)
+
+
+def test_preflight_rejects_supplier_rate_outside_contract(tmp_path: Path):
+    root = _write_dataset(tmp_path / "source")
+    supplier_file = root / "suppliers.csv"
+    supplier_file.write_text(
+        supplier_file.read_text(encoding="utf-8").replace(",0.9,0.95,", ",1.5,0.95,"),
+        encoding="utf-8",
+    )
+    with pytest.raises(PreflightError, match="on_time_rate"):
+        preflight_dataset(root)
 
 
 def _write_dataset(root: Path) -> Path:

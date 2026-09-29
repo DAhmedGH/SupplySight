@@ -81,7 +81,7 @@ models:
       - {name: forecast_month, tests: [not_null]}
       - {name: inventory_snapshot_key, description: Selected exact-cutoff snapshot lineage; null when unavailable.}
       - {name: scheduled_inbound_units, description: PO-derived dated inbound within the month.}
-      - {name: empirical_stress_buffer_units, description: Monthly upper-demand minus point-demand buffer; empirical forecast stress, not statistical safety stock.}
+      - {name: empirical_stress_buffer_units, description: 'Monthly upper-demand minus point-demand buffer; empirical forecast stress, not statistical safety stock.'}
       - {name: forecast_month_complete, tests: [not_null]}
       - {name: forecast_bounds_complete, tests: [not_null]}
 
@@ -108,7 +108,7 @@ models:
       - {name: stressed_shortage_units, description: Additional units required to keep upper-demand projection nonnegative.}
       - {name: suggested_reorder_units, description: Whole-unit ceiling of maximum upper-demand deficit from standard reorder arrival onward.}
       - {name: immediate_mitigation_flag, description: True when a modeled point or stress shortage begins before standard reorder arrival.}
-      - {name: empirical_stress_buffer_units, description: Upper minus point lead-time demand; empirical forecast stress, not statistical safety stock.}
+      - {name: empirical_stress_buffer_units, description: 'Upper minus point lead-time demand; empirical forecast stress, not statistical safety stock.'}
       - {name: potential_revenue_exposure, description: Expected shortage units multiplied by pre-cutoff delivered recognized historical realized unit value.}
       - {name: has_forecast_fallback, tests: [not_null]}
       - {name: snapshot_product_history_fallback, description: May be null when the cutoff snapshot is unavailable.}

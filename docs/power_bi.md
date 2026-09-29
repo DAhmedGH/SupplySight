@@ -1,14 +1,24 @@
-# Power BI reporting layer (Phase 11)
+# Power BI reporting layer
 
 ## Purpose and connection
 
 The Power BI project in `powerbi/` is the business-intelligence consumption layer for SupplySight. It uses **Import** mode against `SUPPLY_CHAIN_DEV` and `SUPPLY_CHAIN_DEV_WH`. Import keeps this small historical portfolio model responsive and makes report interactions independent of repeated Snowflake queries. Refresh locally after validating the source scenario; credentials remain in the local Power BI credential store and are not committed.
 
-Use the implemented `POWERBI_READER` role for interactive DEV access. It has `USAGE` on `SUPPLY_CHAIN_DEV_WH`, `SUPPLY_CHAIN_DEV`, and the `CORE`, `MARTS`, and `FORECASTING` schemas, plus `SELECT` on all tables and views in those three curated schemas. This is schema-wide curated read access, not per-table grants. The setup does not grant RAW or STAGING access to this role. The DEV service/write role used for ingestion and builds is separate. Do not configure production credentials or store Power BI authentication state in the repository.
+Use the implemented `POWERBI_READER` role for interactive DEV access. Its curated read grants require:
+
+| Object scope | Required grant |
+| --- | --- |
+| Warehouse `SUPPLY_CHAIN_DEV_WH` | `USAGE` |
+| Database `SUPPLY_CHAIN_DEV` | `USAGE` |
+| Schemas `SUPPLY_CHAIN_DEV.CORE`, `SUPPLY_CHAIN_DEV.MARTS`, and `SUPPLY_CHAIN_DEV.FORECASTING` | `USAGE` on each schema |
+| Existing relations in each of those schemas | `SELECT ON ALL TABLES` and `SELECT ON ALL VIEWS` |
+| Relations created or recreated in each of those schemas | `SELECT ON FUTURE TABLES` and `SELECT ON FUTURE VIEWS` |
+
+The first Desktop refresh after the corrected dbt rebuild failed because recreated relations had lost object-level `SELECT` grants. Current and future grants were then applied to the live DEV role, and Desktop refresh succeeded. Both kinds of SELECT grant matter: future grants cover subsequent dbt creations or replacements, while grants on all existing relations repair objects already present. This setup grants `POWERBI_READER` no RAW or STAGING access. The DEV service/write role used for ingestion and builds is separate. Do not configure production credentials or store Power BI authentication state in the repository.
 
 ## Source boundary and model
 
-The model imports only business-ready CORE dimensions, monthly MARTS outputs, Phase 10 planning marts, and Phase 9 forecast outputs:
+The model imports only business-ready CORE dimensions, monthly MARTS outputs, inventory-planning marts, and forecast outputs:
 
 | Semantic table | Snowflake source | Grain and purpose |
 | --- | --- | --- |
@@ -62,7 +72,7 @@ The Inventory and Forecasting pages display: **“Historical planning validation
 
 ## Report gallery
 
-These Power BI Desktop captures show the historical DEV scenario. Select a thumbnail to view the full image.
+These Power BI Desktop captures show the corrected persisted DEV historical scenario after a successful Desktop refresh. The source observations end on December 31, 2024; the forecast and planning horizon is January–March 2025. Select a thumbnail to view the full image.
 
 | Executive Overview | Inventory & Replenishment |
 | --- | --- |
@@ -72,12 +82,14 @@ These Power BI Desktop captures show the historical DEV scenario. Select a thumb
 
 ## Scenario lineage and refresh
 
-Before imported forecast/planning data are accepted, the Power Query source validation checks that one compatible forecast run is `SUCCEEDED` and has `observed_through = 2024-12-31`. For every product/warehouse series, forecast and planning data must each contain exactly one row for January, February, and March 2025, and both must match the same `forecast_run_id` used by the Phase 10 recommendation mart. The guard also compares product/warehouse key sets across forecast, evaluation, planning, and recommendation outputs. A mismatch, duplicate month, or incomplete horizon raises a clear query error; refresh must not combine a replacement `CURRENT_FORECASTS` run with historical planning outputs.
+Before imported forecast/planning data are accepted, the Power Query source validation checks that one compatible forecast run is `SUCCEEDED` and has `observed_through = 2024-12-31`. Evaluation keys are checked only for the current forecast run; older evaluation rows remain valid history. For every product/warehouse series, forecast and planning data must each contain exactly one row for January, February, and March 2025, and both must match the same `forecast_run_id` used by the inventory-recommendation mart. The guard also compares product/warehouse key sets across forecast, evaluation, planning, and recommendation outputs. A mismatch, duplicate month, or incomplete horizon raises a clear query error; refresh must not combine a replacement `CURRENT_FORECASTS` run with historical planning outputs.
 
-To refresh locally, open `powerbi/SupplySight.pbip` in a compatible Power BI Desktop release. The `SnowflakeServer` Power Query parameter contains the project's DEV account host; change it if your authorized DEV account differs. Configure local DEV credentials with `POWERBI_READER`, then refresh the model. Confirm the validation query succeeds before reviewing report values. Do not commit credentials, cache files, or local editor-setting changes. This report is an imported historical scenario, not a continuously current operational report.
+Power BI Desktop refreshed successfully against the corrected DEV relations with the repaired `POWERBI_READER` grants. To reproduce that import locally, open `powerbi/SupplySight.pbip` in a compatible Power BI Desktop release. The `SnowflakeServer` Power Query parameter contains the project's DEV account host; change it if your authorized DEV account differs. Configure local DEV credentials with `POWERBI_READER`, then refresh the model. Confirm the validation query succeeds before reviewing report values. Do not commit credentials, cache files, or local editor-setting changes. This report is an imported historical scenario, not a continuously current operational report.
 
 ## Reconciliation and limitations
 
-Validate imported model values against read-only queries to the corresponding DEV relations. Phase 11 reconciliation targets are: 2024 revenue about 2,053,050.65; December month-end inventory value about 540,863.35; supplier OTIF components 124 / 234; 360 forecast rows and 4,180 point-demand units; risk tiers of 5 critical, 28 high, 50 medium, and 37 low; 939 expected shortage units; 2,877 suggested reorder units; approximately 167,193 source-currency units of potential exposure; and 7 transfer units. These are validation checks, not report constants.
+The refreshed report reconciles to the corrected persisted DEV scenario. For 2024 actuals, recognized revenue is **2,017,378.4280**, COGS **1,094,518.74**, gross profit **922,859.6880**, and gross margin **45.745492%**. December month-end inventory value is **540,863.35**. Supplier OTIF has **124** on-time-in-full lines from **234** due lines. The logistics cohort contains **4,740** shipments and **11,312** shipped units; **4,343** were completed. Timeliness covers **4,299** shipments: **3,305** on time and **994** late, giving **76.878344%** on time. Mean transit time is **3.965231** days. Eligible returns total **277** records, **467** units, and **92,016.85** in refunds.
+
+At the December cutoff, trailing-90-day delivered demand is **3,304** units and COGS is **343,870.58**; inventory turnover is **0.639033287** and days of supply **149.447762079**. The historical forecast has **120** series, **360** rows, and **101** comparable validation series. Paired baseline/Holt validation MAE is **5.114411 / 5.989852**; holdout MAE, RMSE, and WAPE are **7.088889**, **10.173040**, and **61.052632%**. Planning has **120** positions with **5 / 28 / 50 / 37** critical/high/medium/low tiers, **78** positive reorder positions totaling **2,877** units, and **2** transfer allocations totaling **7** units. Potential revenue exposure is **167,157.510213** in source currency. These persisted values are reconciliation facts, not hard-coded report constants.
 
 The source history is synthetic and ends on 2024-12-31. January–March 2025 forecasts and planning recommendations are historical validation outputs with no realized forecast-period outcomes in the project. Holt underperformed the baseline and forecast error is high. Six planning positions have no selected supplier and therefore no available reorder quantity. Only two transfer allocations were produced. Monetary values remain in source currency; no currency conversion is performed. Product history before first observation uses fallback attributes. These constraints should remain visible where they affect interpretation.

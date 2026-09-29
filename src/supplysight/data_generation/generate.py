@@ -34,7 +34,7 @@ SUBCATEGORIES = {
 def generate_dataset(
     config: GenerationConfig, *, clean: bool = False
 ) -> dict[str, Any]:
-    """Create all Phase 2 CSV files and a machine-readable generation report."""
+    """Create all synthetic CSV files and a machine-readable generation report."""
     config.output_dir.mkdir(parents=True, exist_ok=True)
     rngs = {
         name: random.Random(config.seed + i * 104729)
@@ -511,19 +511,20 @@ def _make_fulfillment(
         delivery = (
             ship_day + timedelta(days=ship_rng.randint(1, 7)) if delivered else None
         )
+        delivered_by_cutoff = bool(delivery and delivery <= config.end_date)
         if shipped_quantity < int(order["quantity"]):
             order["status"] = "partially_fulfilled"
         else:
-            order["status"] = "delivered" if delivered else "processing"
+            order["status"] = "delivered" if delivered_by_cutoff else "processing"
         shipments.append(
             {
                 "shipment_id": f"SHP-{i + 1:08d}",
                 "order_line_id": order["order_line_id"],
                 "warehouse_id": warehouse["warehouse_id"],
                 "ship_date": ship_day.isoformat(),
-                "delivery_date": delivery.isoformat() if delivery else "",
+                "delivery_date": delivery.isoformat() if delivered_by_cutoff else "",
                 "shipped_quantity": shipped_quantity,
-                "shipment_status": "delivered" if delivered else "in_transit",
+                "shipment_status": "delivered" if delivered_by_cutoff else "in_transit",
                 "carrier": ship_rng.choice(
                     [
                         "Northstar Parcel",
@@ -560,7 +561,11 @@ def _make_fulfillment(
                     ),
                 }
             )
-    return shipments, returns
+    return shipments, [
+        row
+        for row in returns
+        if date.fromisoformat(row["return_date"]) <= config.end_date
+    ]
 
 
 def _write_csv(path: Path, table: str, rows: Iterable[dict[str, Any]]) -> None:

@@ -52,6 +52,17 @@ def test_validation_is_before_separate_final_test():
     assert temporal_splits(11) == ()
 
 
+@pytest.mark.parametrize("horizon", [-1, 0, 1, 2, 4, 6])
+def test_v1_rejects_horizons_other_than_three(horizon):
+    with pytest.raises(ValueError, match="three-month forecast horizon"):
+        run_forecast(
+            [],
+            coverage_start=date(2024, 1, 1),
+            observed_through=date(2024, 12, 31),
+            horizon=horizon,
+        )
+
+
 def test_baseline_candidate_metrics_and_nonnegative_predictions():
     assert moving_average([2, 4, 6]) == [4, 4, 4]
     assert all(value >= 0 for value in fit_damped_holt([1, 2, 3]).predict(3))

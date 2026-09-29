@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from datetime import date, datetime
 from pathlib import Path
 
@@ -79,9 +80,19 @@ def test_target_guard_rejects_non_dev_before_connection():
         validate_target(settings(database="SUPPLY_CHAIN_PROD"))
     with pytest.raises(ConfigurationError):
         validate_target(settings(schema="FORECASTING"))
-    for role in ("ACCOUNTADMIN", "SUPPLYSIGHT_PROD", "OTHER_ROLE"):
+    for role in (
+        "ACCOUNTADMIN",
+        "SUPPLYSIGHT_PROD",
+        "OTHER_ROLE",
+        "UNAPPROVED_DEV_ALIAS",
+    ):
         with pytest.raises(ConfigurationError):
             validate_target(settings(role=role))
+
+
+def test_forecast_role_error_names_canonical_role():
+    with pytest.raises(ConfigurationError, match="SUPPLYSIGHT_DEV_SERVICE"):
+        validate_target(settings(role="OTHER_ROLE"))
 
 
 def test_active_session_context_is_checked():
@@ -236,6 +247,100 @@ def test_persistence_rolls_back_failed_transaction(monkeypatch):
     )
 
 
+def test_failed_same_id_retry_preserves_successful_publication(monkeypatch):
+    tables = {
+        name: []
+        for name in ("CURRENT_FORECASTS", "MODEL_EVALUATION", "RUN_METADATA")
+    }
+
+    class TransactionalConnection:
+        def __init__(self):
+            self.work = None
+            self.fail_evaluation = False
+            self.selected = None
+
+        def cursor(self):
+            return self
+
+        def execute(self, sql, params=None):
+            nonlocal tables
+            statement = " ".join(sql.upper().split())
+            if statement == "BEGIN":
+                self.work = deepcopy(tables)
+            elif statement.startswith("SELECT 1 FROM"):
+                self.selected = next(
+                    (row for row in self.work["RUN_METADATA"] if row[0] == params[0]),
+                    None,
+                )
+            elif statement.startswith("DELETE FROM"):
+                name = next(name for name in tables if name in statement)
+                self.work[name] = (
+                    [row for row in self.work[name] if row[0] != params[0]]
+                    if params
+                    else []
+                )
+            elif statement.startswith("INSERT INTO"):
+                name = next(name for name in tables if name in statement)
+                self.work[name].append(params)
+
+        def executemany(self, sql, rows):
+            name = next(name for name in tables if name in sql)
+            if name == "MODEL_EVALUATION" and self.fail_evaluation:
+                raise RuntimeError("injected evaluation write failure")
+            self.work[name].extend(rows)
+
+        def fetchone(self):
+            return self.selected
+
+        def commit(self):
+            nonlocal tables
+            tables = deepcopy(self.work)
+            self.work = None
+
+        def rollback(self):
+            self.work = None
+
+        def close(self):
+            pass
+
+    connection = TransactionalConnection()
+    monkeypatch.setattr(
+        "supplysight.forecasting.repository._connect", lambda _: connection
+    )
+    metadata = {"horizon": 3, "series_attempted": 1, "series_successful": 1}
+    persist_run(
+        settings(),
+        run_id="deterministic-run",
+        forecasts=[{"product_id": "P1", "predicted_demand": 4.0}],
+        evaluations=[{"product_id": "P1", "warehouse_key": "W1", "mae": 2.0}],
+        run_metadata=metadata,
+    )
+    published = deepcopy(tables)
+    assert published["RUN_METADATA"][0][3] == "SUCCEEDED"
+
+    connection.fail_evaluation = True
+    with pytest.raises(RuntimeError, match="injected evaluation write failure"):
+        persist_run(
+            settings(),
+            run_id="deterministic-run",
+            forecasts=[{"product_id": "P1", "predicted_demand": 99.0}],
+            evaluations=[{"product_id": "P1", "warehouse_key": "W1", "mae": 99.0}],
+            run_metadata=metadata,
+        )
+    assert tables == published
+
+    persist_run(
+        settings(),
+        run_id="deterministic-run",
+        forecasts=[],
+        evaluations=[],
+        run_metadata=metadata,
+        status="FAILED",
+        failure_reason="computation failed",
+    )
+    assert tables == published
+
+
 def test_cli_uses_core_deterministic_run_id_when_not_provided(monkeypatch):
     from supplysight.forecasting import cli
 
@@ -273,3 +378,24 @@ def test_cli_uses_core_deterministic_run_id_when_not_provided(monkeypatch):
     assert cli.main(arguments) == 0
     assert saved_ids[0] == saved_ids[1]
     assert len(saved_ids[0]) == 36
+
+
+@pytest.mark.parametrize("horizon", [0, 1, 2, 4, 6])
+def test_cli_rejects_other_horizons_before_loading_configuration(
+    monkeypatch, horizon
+):
+    from supplysight.forecasting import cli
+
+    monkeypatch.setattr(
+        cli,
+        "load_dotenv",
+        lambda *args, **kwargs: pytest.fail("configuration should not be loaded"),
+    )
+    with pytest.raises(SystemExit, match="three-month forecast horizon"):
+        cli.main(
+            [
+                "--coverage-start", "2024-01-01",
+                "--observed-through", "2024-12-31",
+                "--horizon", str(horizon),
+            ]
+        )

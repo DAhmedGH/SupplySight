@@ -22,7 +22,7 @@ models:
       - {name: is_late, description: True only when completed delivery is later than the eligible order promised date; null when comparison is unavailable.}
       - {name: timeliness_eligible_count, description: Denominator contribution for on-time rate; completed shipment with eligible promised date.}
       - {name: on_time_shipment_count, description: Numerator contribution for on-time rate.}
-      - {name: upstream_order_quality_status, description: CORE order quality state, including QUARANTINED context., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING, QUARANTINED]}}}]}
+      - {name: upstream_order_quality_status, description: 'CORE order quality state, including QUARANTINED context.', tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING, QUARANTINED]}}}]}
       - {name: product_history_fallback, description: CORE earliest-observed product version fallback flag., tests: [not_null]}
       - {name: quality_status, description: CORE shipment quality state; CLEAN and WARNING included., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING]}}}]}
   - name: logistics_monthly

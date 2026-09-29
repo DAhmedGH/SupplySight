@@ -24,8 +24,8 @@ models:
       - {name: supplier_id, description: Supplier business key., tests: [not_null]}
       - {name: month_start, description: First date of service cohort or spend calendar month., tests: [not_null]}
       - {name: supplier_spend, description: Sum of ordered costs for lines ordered during month; null if no spend cohort.}
-      - {name: warning_po_line_count, description: Warning quality PO lines in the spend cohort, assigned by order month.}
-      - {name: product_history_fallback_po_line_count, description: PO lines using earliest product version in the spend cohort, assigned by order month.}
+      - {name: warning_po_line_count, description: 'Warning quality PO lines in the spend cohort, assigned by order month.'}
+      - {name: product_history_fallback_po_line_count, description: 'PO lines using earliest product version in the spend cohort, assigned by order month.'}
       - {name: service_warning_line_count, description: Warning quality PO lines in the expected-delivery month cohort.}
       - {name: service_fallback_line_count, description: PO lines using earliest product version in the expected-delivery month cohort.}
       - {name: otif_numerator, description: Due lines received on or before expected date and in full.}

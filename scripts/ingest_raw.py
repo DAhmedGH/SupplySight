@@ -1,4 +1,4 @@
-"""Validate Phase 2 CSV files and load them into the development RAW schema."""
+"""Validate synthetic CSV files and load them into the development RAW schema."""
 
 from __future__ import annotations
 

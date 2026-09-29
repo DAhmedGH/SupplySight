@@ -25,7 +25,7 @@ models:
       - {name: source_system, description: RAW source system identifier.}
       - {name: row_hash, description: RAW source-value hash.}
       - {name: quality_status, description: Uppercase RAW quality classification., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING, QUARANTINED]}}}]}
-      - {name: quality_issues, description: RAW issue-code array, preserved without filtering.}
+      - {name: quality_issues, description: 'RAW issue-code array, preserved without filtering.'}
       - {name: is_quarantined, description: True when RAW quality_status is QUARANTINED.}
   - name: stg_warehouses
     description: >-
@@ -46,7 +46,7 @@ models:
       - {name: source_system, description: RAW source system identifier.}
       - {name: row_hash, description: RAW source-value hash.}
       - {name: quality_status, description: Uppercase RAW quality classification., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING, QUARANTINED]}}}]}
-      - {name: quality_issues, description: RAW issue-code array, preserved without filtering.}
+      - {name: quality_issues, description: 'RAW issue-code array, preserved without filtering.'}
       - {name: is_quarantined, description: True when RAW quality_status is QUARANTINED.}
   - name: stg_suppliers
     description: Typed current suppliers with normalized geography and parsed metrics; grain is supplier_id.
@@ -70,7 +70,7 @@ models:
       - {name: source_system, description: RAW source system identifier.}
       - {name: row_hash, description: RAW source-value hash.}
       - {name: quality_status, description: Uppercase RAW quality classification., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING, QUARANTINED]}}}]}
-      - {name: quality_issues, description: RAW issue-code array, preserved without filtering.}
+      - {name: quality_issues, description: 'RAW issue-code array, preserved without filtering.'}
       - {name: is_quarantined, description: True when RAW quality_status is QUARANTINED.}
   - name: stg_customers
     description: Typed current customers with normalized region; grain is customer_id.
@@ -89,7 +89,7 @@ models:
       - {name: source_system, description: RAW source system identifier.}
       - {name: row_hash, description: RAW source-value hash.}
       - {name: quality_status, description: Uppercase RAW quality classification., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING, QUARANTINED]}}}]}
-      - {name: quality_issues, description: RAW issue-code array, preserved without filtering.}
+      - {name: quality_issues, description: 'RAW issue-code array, preserved without filtering.'}
       - {name: is_quarantined, description: True when RAW quality_status is QUARANTINED.}
   - name: stg_orders
     description: Typed order-line source rows; grain is order_line_id and raw soft-quality rows remain visible.
@@ -114,7 +114,7 @@ models:
       - {name: source_system, description: RAW source system identifier.}
       - {name: row_hash, description: RAW source-value hash.}
       - {name: quality_status, description: Uppercase RAW quality classification., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING, QUARANTINED]}}}]}
-      - {name: quality_issues, description: RAW issue-code array, preserved without filtering.}
+      - {name: quality_issues, description: 'RAW issue-code array, preserved without filtering.'}
       - {name: is_quarantined, description: True when RAW quality_status is QUARANTINED.}
   - name: stg_inventory_snapshots
     description: Typed inventory positions; grain is snapshot date, warehouse and product. Quarantined balance issues remain visible.
@@ -137,7 +137,7 @@ models:
       - {name: source_system, description: RAW source system identifier.}
       - {name: row_hash, description: RAW source-value hash.}
       - {name: quality_status, description: Uppercase RAW quality classification., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING, QUARANTINED]}}}]}
-      - {name: quality_issues, description: RAW issue-code array, preserved without filtering.}
+      - {name: quality_issues, description: 'RAW issue-code array, preserved without filtering.'}
       - {name: is_quarantined, description: True when RAW quality_status is QUARANTINED.}
   - name: stg_purchase_orders
     description: Typed purchase-order lines; grain is po_line_id.
@@ -163,7 +163,7 @@ models:
       - {name: source_system, description: RAW source system identifier.}
       - {name: row_hash, description: RAW source-value hash.}
       - {name: quality_status, description: Uppercase RAW quality classification., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING, QUARANTINED]}}}]}
-      - {name: quality_issues, description: RAW issue-code array, preserved without filtering.}
+      - {name: quality_issues, description: 'RAW issue-code array, preserved without filtering.'}
       - {name: is_quarantined, description: True when RAW quality_status is QUARANTINED.}
   - name: stg_shipments
     description: Typed shipment records; grain is shipment_id. Missing delivered-row delivery dates remain null and are flagged from RAW.
@@ -185,7 +185,7 @@ models:
       - {name: source_system, description: RAW source system identifier.}
       - {name: row_hash, description: RAW source-value hash.}
       - {name: quality_status, description: Uppercase RAW quality classification., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING, QUARANTINED]}}}]}
-      - {name: quality_issues, description: RAW issue-code array, preserved without filtering.}
+      - {name: quality_issues, description: 'RAW issue-code array, preserved without filtering.'}
       - {name: is_quarantined, description: True when RAW quality_status is QUARANTINED.}
   - name: stg_returns
     description: Typed return events; grain is return_id.
@@ -206,5 +206,5 @@ models:
       - {name: source_system, description: RAW source system identifier.}
       - {name: row_hash, description: RAW source-value hash.}
       - {name: quality_status, description: Uppercase RAW quality classification., tests: [{accepted_values: {arguments: {values: [CLEAN, WARNING, QUARANTINED]}}}]}
-      - {name: quality_issues, description: RAW issue-code array, preserved without filtering.}
+      - {name: quality_issues, description: 'RAW issue-code array, preserved without filtering.'}
       - {name: is_quarantined, description: True when RAW quality_status is QUARANTINED.}

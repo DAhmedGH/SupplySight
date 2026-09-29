@@ -2,13 +2,13 @@
 
 ## Scope
 
-The Phase 3 loader transfers the nine CSV contracts defined in [data_contracts.md](data_contracts.md) into the `SUPPLY_CHAIN_DEV.RAW` schema. It is a Python ingestion workflow; it does not transform source values, run dbt, or create downstream models. The destination database and warehouse are fixed to `SUPPLY_CHAIN_DEV` and `SUPPLY_CHAIN_DEV_WH`. Credentials are supplied through environment configuration and are never stored in source control.
+The RAW loader transfers the nine CSV contracts defined in [data_contracts.md](data_contracts.md) into the `SUPPLY_CHAIN_DEV.RAW` schema. It is a Python ingestion workflow; it does not transform source values, run dbt, or create downstream models. The destination database and warehouse are fixed to `SUPPLY_CHAIN_DEV` and `SUPPLY_CHAIN_DEV_WH`. Credentials are supplied through environment configuration and are never stored in source control.
 
 The source files are a single related entity graph. The loader validates the complete graph before opening a Snowflake session so malformed or referentially invalid input cannot leave a partially loaded graph.
 
 ## Source and RAW contracts
 
-The nine destination tables are `PRODUCTS`, `WAREHOUSES`, `SUPPLIERS`, `CUSTOMERS`, `ORDERS`, `INVENTORY_SNAPSHOTS`, `PURCHASE_ORDERS`, `SHIPMENTS`, and `RETURNS`. Their source columns and grains match the CSV contracts. Source values are stored as `VARCHAR` to preserve their original CSV representation, including blank optional values. Conversion to analytical types belongs to a later transformation phase.
+The nine destination tables are `PRODUCTS`, `WAREHOUSES`, `SUPPLIERS`, `CUSTOMERS`, `ORDERS`, `INVENTORY_SNAPSHOTS`, `PURCHASE_ORDERS`, `SHIPMENTS`, and `RETURNS`. Their source columns and grains match the CSV contracts. Source values are stored as `VARCHAR` to preserve their original CSV representation, including blank optional values. dbt staging converts source values to analytical types.
 
 Each source table adds the following ingestion columns:
 
@@ -68,4 +68,4 @@ The loader completes local preflight before connecting. After verifying the acti
 
 Review the batch and file audit records after each load. Confirm all nine files completed, source and merged row counts reconcile, quality counts match the local preflight report, and the target's per-entity key counts agree with the expected current dataset. A repeated load of unchanged input should report unchanged rows and no source-row updates.
 
-Phase 3 ends at Snowflake RAW. dbt transformations, forecasting, and Power BI work begin in later phases.
+The loader ends at Snowflake RAW. dbt transformations, forecasting, and Power BI are documented in their respective runbooks.

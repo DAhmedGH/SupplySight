@@ -117,7 +117,11 @@ def _run_warehouse(**context: object) -> dict[str, object]:
         ("parse", ("parse",), 600),
         ("compile", ("compile",), 1800),
         ("staging run", ("run", "--select", "tag:staging"), 1800),
-        ("staging test", ("test", "--select", "tag:staging"), 1800),
+        (
+            "staging test",
+            ("test", "--select", "tag:staging", "--indirect-selection", "cautious"),
+            1800,
+        ),
         ("product snapshot", ("snapshot", "--select", "snap_products"), 1800),
         (
             "intermediate and core run",
@@ -126,7 +130,10 @@ def _run_warehouse(**context: object) -> dict[str, object]:
         ),
         (
             "intermediate and core test",
-            ("test", "--select", "tag:intermediate", "tag:core"),
+            (
+                "test", "--select", "tag:intermediate", "tag:core",
+                "--indirect-selection", "cautious",
+            ),
             2700,
         ),
         ("marts run", ("run", "--select", "tag:marts"), 3600),
@@ -195,7 +202,7 @@ def _run_forecast(as_of: date | None = None) -> None:
 
 
 def _run_inventory_intelligence() -> None:
-    """Build and test Phase 10 models for the compatible historical forecast."""
+    """Build and test inventory models for the compatible historical forecast."""
     if not _historical_forecast_is_compatible():
         raise AirflowSkipException(
             "Inventory intelligence requires one successful current forecast run "
@@ -220,7 +227,7 @@ def _run_inventory_intelligence() -> None:
 
 
 def _historical_forecast_is_compatible() -> bool:
-    """Read-only check that CURRENT_FORECASTS has the historical Phase 10 run."""
+    """Read-only check that CURRENT_FORECASTS has the historical planning run."""
     from supplysight.forecasting.repository import _connect
     from supplysight.settings import SnowflakeSettings
 

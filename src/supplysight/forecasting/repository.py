@@ -17,7 +17,7 @@ from supplysight.settings import (
 FORECASTING_SCHEMA = "FORECASTING"
 MARTS_SCHEMA = "MARTS"
 CORE_SCHEMA = "CORE"
-ALLOWED_DEV_ROLES = {"SUPPLYSIGHT_DEV_SERVICE", "SUPPLY_SIGHT_DEV_SERVICE"}
+ALLOWED_DEV_ROLES = {"SUPPLYSIGHT_DEV_SERVICE"}
 FORECAST_MODEL_VERSION = "monthly_demand_v1"
 
 
@@ -33,7 +33,8 @@ def validate_target(settings: SnowflakeSettings) -> None:
     ):
         raise ConfigurationError(
             "Forecasting requires SUPPLY_CHAIN_DEV / SUPPLY_CHAIN_DEV_WH; "
-            "the configured schema must remain RAW."
+            "the configured schema must remain RAW and the role must be "
+            "SUPPLYSIGHT_DEV_SERVICE."
         )
 
 
@@ -236,6 +237,30 @@ def _run_parameters(run: Any, run_id: str, status: str, error: str | None):
     )
 
 
+def _record_failed_run(
+    cursor: Any,
+    connection: Any,
+    insert_metadata: str,
+    run: dict[str, Any],
+    run_id: str,
+    failure_reason: str | None,
+) -> None:
+    """Record a new failure without changing an existing publication."""
+    cursor.execute("BEGIN")
+    cursor.execute(
+        "SELECT 1 FROM "
+        f"{DEVELOPMENT_DATABASE}.{FORECASTING_SCHEMA}.RUN_METADATA "
+        "WHERE RUN_ID = %s LIMIT 1",
+        (run_id,),
+    )
+    if cursor.fetchone() is None:
+        cursor.execute(
+            insert_metadata,
+            _run_parameters(run, run_id, "FAILED", failure_reason),
+        )
+    connection.commit()
+
+
 def persist_run(
     settings: SnowflakeSettings,
     *,
@@ -256,6 +281,8 @@ def persist_run(
         raise ValueError("status must be SUCCESS, SUCCEEDED, PARTIAL, or FAILED")
     forecasts = list(forecasts)
     evaluations = list(evaluations)
+    if status == "FAILED" and (forecasts or evaluations):
+        raise ValueError("FAILED runs cannot publish forecasts or evaluations")
     run = _mapping(run_metadata) if run_metadata is not None else {}
     defaults = {
         "generated_at": _get(run, "generated_at", "started_at", default=datetime.now()),
@@ -293,17 +320,36 @@ def persist_run(
          INPUT_FINGERPRINT, COVERAGE_START, OBSERVED_THROUGH, MODEL_VERSION)
         VALUES ({', '.join(['%s'] * 18)})
     """
+    metadata_values = {
+        **run,
+        "coverage_start": coverage_start,
+        "observed_through": observed_through,
+        "source_version": defaults["source_version"],
+    }
 
     connection = _connect(settings)
     try:
         cursor = connection.cursor()
         try:
+            if status == "FAILED":
+                try:
+                    _record_failed_run(
+                        cursor,
+                        connection,
+                        insert_metadata,
+                        metadata_values,
+                        run_id,
+                        failure_reason,
+                    )
+                except Exception:
+                    connection.rollback()
+                    raise
+                return
             cursor.execute("BEGIN")
-            if status in {"SUCCEEDED", "PARTIAL"}:
-                cursor.execute(
-                    "DELETE FROM "
-                    f"{DEVELOPMENT_DATABASE}.{FORECASTING_SCHEMA}.CURRENT_FORECASTS"
-                )
+            cursor.execute(
+                "DELETE FROM "
+                f"{DEVELOPMENT_DATABASE}.{FORECASTING_SCHEMA}.CURRENT_FORECASTS"
+            )
             cursor.execute(
                 "DELETE FROM "
                 f"{DEVELOPMENT_DATABASE}.{FORECASTING_SCHEMA}.MODEL_EVALUATION "
@@ -329,10 +375,6 @@ def persist_run(
                         for row in evaluations
                     ],
                 )
-            metadata_values = dict(run)
-            metadata_values["coverage_start"] = coverage_start
-            metadata_values["observed_through"] = observed_through
-            metadata_values["source_version"] = defaults["source_version"]
             cursor.execute(
                 insert_metadata,
                 _run_parameters(metadata_values, run_id, status, failure_reason),
@@ -348,29 +390,14 @@ def persist_run(
                 "source_version": defaults["source_version"],
             }
             try:
-                cursor.execute("BEGIN")
-                cursor.execute(
-                    "DELETE FROM "
-                    f"{DEVELOPMENT_DATABASE}.{FORECASTING_SCHEMA}.MODEL_EVALUATION "
-                    "WHERE RUN_ID = %s",
-                    (run_id,),
-                )
-                cursor.execute(
-                    "DELETE FROM "
-                    f"{DEVELOPMENT_DATABASE}.{FORECASTING_SCHEMA}.RUN_METADATA "
-                    "WHERE RUN_ID = %s",
-                    (run_id,),
-                )
-                cursor.execute(
+                _record_failed_run(
+                    cursor,
+                    connection,
                     insert_metadata,
-                    _run_parameters(
-                        failure,
-                        run_id,
-                        "FAILED",
-                        (failure_reason or str(write_error))[:2000],
-                    ),
+                    failure,
+                    run_id,
+                    (failure_reason or str(write_error))[:2000],
                 )
-                connection.commit()
             except Exception:
                 connection.rollback()
             raise

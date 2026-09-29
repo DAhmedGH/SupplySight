@@ -60,8 +60,8 @@ def main(argv: list[str] | None = None) -> int:
     )[1]
     if args.observed_through.day != month_end:
         raise SystemExit("--observed-through must be the last day of a month")
-    if args.horizon < 1:
-        raise SystemExit("--horizon must be at least 1")
+    if args.horizon != 3:
+        raise SystemExit("V1 requires a three-month forecast horizon (--horizon 3)")
 
     load_dotenv(args.env_file, override=False)
     settings = SnowflakeSettings.from_environment()

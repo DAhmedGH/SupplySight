@@ -3,7 +3,7 @@ version: 2
 sources:
   - name: raw
     description: >-
-      Current-state source entities loaded by the Phase 3 Python ingestion workflow.
+      Current-state source entities loaded by the Python ingestion workflow.
       Source values remain VARCHAR in RAW; ingestion metadata records batch lineage
       and soft quality classifications. Structural preflight failures never enter RAW.
     database: SUPPLY_CHAIN_DEV
@@ -141,7 +141,7 @@ sources:
           - {name: PRODUCT_ID, description: Product foreign key.}
           - {name: ORDER_DATE, description: ISO order date.}
           - {name: EXPECTED_DELIVERY_DATE, description: ISO expected delivery date.}
-          - {name: RECEIVED_DATE, description: ISO receipt date, nullable before receipt.}
+          - {name: RECEIVED_DATE, description: 'ISO receipt date, nullable before receipt.'}
           - {name: ORDERED_QUANTITY, description: Ordered whole units.}
           - {name: RECEIVED_QUANTITY, description: Received whole units.}
           - {name: UNIT_COST, description: Source unit cost as text.}

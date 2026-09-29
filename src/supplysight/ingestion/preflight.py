@@ -1,4 +1,4 @@
-"""Streaming preflight checks for the nine Phase 2 CSV contracts."""
+"""Streaming preflight checks for the nine synthetic CSV contracts."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ import json
 import re
 from dataclasses import dataclass, field
 from datetime import date
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal
 from pathlib import Path
 from typing import Any
 
@@ -132,6 +132,11 @@ def _valid_value(entity: str, col: str, value: str) -> bool:
             return str(int(value)) == value and int(value) >= 0
         except ValueError:
             return False
+    if col in {"on_time_rate", "quality_rate"}:
+        return (
+            _is_snowflake_decimal(value)
+            and Decimal("0") <= Decimal(value) <= Decimal("1")
+        )
     if col in decimal_cols:
         return _is_snowflake_decimal(value)
     if col in bool_cols:
@@ -147,11 +152,6 @@ def _valid_value(entity: str, col: str, value: str) -> bool:
         return value in DISPOSITIONS
     if entity == "shipments" and col == "shipment_status":
         return value in {"delivered", "in_transit"}
-    if col in {"on_time_rate", "quality_rate"}:
-        try:
-            return Decimal("0") <= Decimal(value) <= Decimal("1")
-        except InvalidOperation:
-            return False
     return True
 
 

@@ -2,7 +2,7 @@
 
 ## Scope and reproducibility
 
-Phase 2 creates local synthetic source data for the SupplySight supply-chain scenario. The generator writes CSV files only. It does not connect to Snowflake or load data, run dbt, build forecasts, or update Power BI assets. Generated data belongs under `data/generated/`, which is excluded from Git.
+The generator creates local synthetic source data for the SupplySight supply-chain scenario. The generator writes CSV files only. It does not connect to Snowflake or load data, run dbt, build forecasts, or update Power BI assets. Generated data belongs under `data/generated/`, which is excluded from Git.
 
 Defaults are seed `20240924`, start date `2024-01-01`, end date `2024-12-31` (inclusive), defect rate `0.01`, and output directory `data/generated`. For identical profile, seed, date range, defect rate, inventory interval, and clean setting, generation produces the same logical records and file contents. Output paths do not affect record values. The development profile is intended for quick iteration; portfolio is intended for larger local analysis. Profile dimensions and default inventory cadence are:
 
@@ -13,9 +13,13 @@ Defaults are seed `20240924`, start date `2024-01-01`, end date `2024-12-31` (in
 
 Master and order-line counts are fixed by profile; shipments and returns depend on order statuses and fulfillment outcomes. Inventory rows vary with the inclusive date range and cadence. Inventory grain is one row per snapshot date, warehouse, and product. `--inventory-interval-days` overrides the profile cadence and must be a positive integer.
 
+The corrected default `dev` dataset persisted for the 2024 historical scenario has **54,789 source rows** across the nine files, including **277 return records**. These are results for the documented seed and cutoff, not fixed counts for every generator option.
+
+The end date is an inclusive observation boundary. Orders and dispatched shipments remain visible, but a shipment delivered after that date is still `in_transit` with a blank `delivery_date`. A fully shipped order awaiting delivery is `processing`; a partly shipped order remains `partially_fulfilled`. Returns are included only when realized by the end date. Future promised order dates and expected purchase-order dates remain because they were known when recorded.
+
 ## File contracts
 
-All files are UTF-8 CSV with a header row. Dates use ISO `YYYY-MM-DD`; timestamps, when present in future contract revisions, must use ISO 8601. Identifiers are stable strings within a generated dataset. Integer quantities are whole units and monetary/rate values are decimal numbers. Boolean flags are serialized consistently as `true` or `false`. Blank optional values represent missing values; they are not the strings `NULL` or `None`.
+All files are UTF-8 CSV with a header row. Dates use ISO `YYYY-MM-DD`; timestamps, when present in future contract revisions, must use ISO 8601. Identifiers are stable strings within a generated dataset. Integer quantities are whole units and monetary/rate values are decimal numbers. The generator serializes Boolean flags as `True` or `False`; ingestion also accepts lowercase `true` and `false`. Blank optional values represent missing values; they are not the strings `NULL` or `None`.
 
 | File | Grain / primary key | Columns (type; `?` means nullable) |
 | --- | --- | --- |

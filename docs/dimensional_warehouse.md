@@ -18,7 +18,7 @@ The five fact grains are:
 
 ## Product history
 
-The product snapshot uses dbt's check strategy over product attributes and quality classification. It captures a new version when an observed product row changes. Its `dbt_valid_from` and `dbt_valid_to` timestamps describe when the warehouse observed those versions, not when product attributes changed in the source system. The Phase 3 RAW tables keep only current rows, so attributes before the first snapshot cannot be reconstructed.
+The product snapshot uses dbt's check strategy over product attributes and quality classification. It captures a new version when an observed product row changes. Its `dbt_valid_from` and `dbt_valid_to` timestamps describe when the warehouse observed those versions, not when product attributes changed in the source system. The current-state RAW tables keep only current rows, so attributes before the first snapshot cannot be reconstructed.
 
 Facts select the product version observed at the end of their event date. Source events have dates rather than timestamps, so within-day ordering of a product change and an event cannot be recovered. For an event before the first observed version, facts use that product's earliest known version and mark `product_history_fallback`. This baseline allows historical 2024 events to retain a product foreign key without presenting the snapshot's validity timestamp as a 2024 effective date. A later product change creates a distinct dimension version for subsequent event dates.
 
@@ -43,7 +43,7 @@ Run the product snapshot before the dimensional build. From the repository root,
 .\.venv\Scripts\dbt.exe compile --project-dir dbt --profiles-dir dbt
 .\.venv\Scripts\dbt.exe snapshot --project-dir dbt --profiles-dir dbt --select snap_products
 .\.venv\Scripts\dbt.exe run --project-dir dbt --profiles-dir dbt --select tag:intermediate tag:core
-.\.venv\Scripts\dbt.exe test --project-dir dbt --profiles-dir dbt
+.\.venv\Scripts\dbt.exe test --project-dir dbt --profiles-dir dbt --select tag:intermediate tag:core --indirect-selection cautious
 ```
 
 Check the documented key and relationship tests, product-version validity, and the staging-to-fact-plus-exception reconciliation after each build. Re-run the product snapshot before refreshing CORE when product attributes may have changed.

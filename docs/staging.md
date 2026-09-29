@@ -2,7 +2,7 @@
 
 ## Scope and targets
 
-Phase 4 reads the nine current-state entity tables in `SUPPLY_CHAIN_DEV.RAW` and builds one view per entity in `SUPPLY_CHAIN_DEV.STAGING`. dbt uses `SUPPLY_CHAIN_DEV_WH`. The RAW tables remain owned by the Python ingestion workflow. Staging performs source-level normalization and casting; downstream business models are outside this phase.
+Staging reads the nine current-state entity tables in `SUPPLY_CHAIN_DEV.RAW` and builds one view per entity in `SUPPLY_CHAIN_DEV.STAGING`. dbt uses `SUPPLY_CHAIN_DEV_WH`. The RAW tables remain owned by the Python ingestion workflow. Staging performs source-level normalization and casting; downstream business models consume the typed views.
 
 Copy `dbt/profiles.yml.example` to the ignored local `dbt/profiles.yml`. The profile reads Snowflake account, user, role, key path, and optional key passphrase from the `SNOWFLAKE_*` shell environment. It fixes the database to `SUPPLY_CHAIN_DEV`, warehouse to `SUPPLY_CHAIN_DEV_WH`, and target schema to `STAGING`. The Python loader continues to use `RAW`. dbt sources explicitly name `SUPPLY_CHAIN_DEV.RAW`, independent of the model target schema.
 
@@ -25,7 +25,7 @@ After exporting the required `SNOWFLAKE_*` connection values into the shell and 
 .\.venv\Scripts\dbt.exe compile --project-dir dbt --profiles-dir dbt --select tag:staging
 .\.venv\Scripts\dbt.exe source freshness --project-dir dbt --profiles-dir dbt
 .\.venv\Scripts\dbt.exe run --project-dir dbt --profiles-dir dbt --select tag:staging
-.\.venv\Scripts\dbt.exe test --project-dir dbt --profiles-dir dbt
+.\.venv\Scripts\dbt.exe test --project-dir dbt --profiles-dir dbt --select tag:staging --indirect-selection cautious
 ```
 
 The source and model YAML under `dbt/models/staging/` describe grains, keys, conversions, quality fields, and column-level tests. Reconcile staged counts, keys, and quality classifications with RAW after each load. Freshness results should be interpreted against the manual DEV refresh schedule; an alert calls for checking source-row load times and the ingestion audits.

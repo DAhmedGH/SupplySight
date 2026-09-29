@@ -29,7 +29,7 @@ Create these **environment-scoped GitHub Actions secrets** in `supply-chain-dev`
 | `SNOWFLAKE_PRIVATE_KEY` | PEM private key content for that user. |
 | `SNOWFLAKE_PRIVATE_KEY_PASSPHRASE` | Optional passphrase if the key is encrypted. |
 
-Do not put these values in repository files, workflow variables, or command arguments. The job does not print secret values or upload dbt artifacts. If required secrets are absent, the job fails before connecting. Pull requests and ordinary pushes never receive Snowflake secrets. The manual job requires existing DEV models and sources; missing relations or failing data tests cause a failure and are not repaired by CI. This includes Phase 10 inventory-intelligence relations after their separately approved DEV build; the workflow does not create or refresh them.
+Do not put these values in repository files, workflow variables, or command arguments. The job does not print secret values or upload dbt artifacts. If required secrets are absent, the job fails before connecting. Pull requests and ordinary pushes never receive Snowflake secrets. The manual job requires existing DEV models and sources; missing relations or failing data tests cause a failure and are not repaired by CI. This includes inventory-intelligence relations after their separately approved DEV build; the workflow does not create or refresh them.
 
 ## Local reproduction
 

@@ -34,15 +34,19 @@ flowchart LR
 
 ## Historical validation using synthetic 2024 operational data
 
-The default DEV dataset contains **54,812 rows** across nine CSVs, including **5,000 order lines**. The forecast uses observations through **Dec 31, 2024** and covers **Jan–Mar 2025**: **120** product × warehouse series and **360** forecast rows.
+The persisted DEV scenario uses **54,789 synthetic source rows** across nine CSVs, including **5,000 order lines** and **277 returns**. In 2024, eligible sales produced **2,017,378.43** in recognized revenue, **1,094,518.74** in COGS, and **922,859.69** in gross profit (**45.75%** margin). The December month-end inventory value was **540,863.35**. Returns totaled **467 units** and **92,016.85** in refunds; returns and refunds remain separate from recognized revenue.
+
+The 2024 logistics mart contains **4,740** eligible shipments and **11,312** shipped units. Of **4,299** shipments eligible for timeliness, **3,305** were on time and **994** were late (**76.88%** on time); **4,343** shipments were completed. At the December cutoff, trailing-90-day delivered demand was **3,304 units**, inventory turnover was **0.639**, and days of supply was **149.45**.
+
+The forecast uses observations through **Dec 31, 2024** and covers **Jan–Mar 2025**: **120** product × warehouse series and **360** forecast rows.
 
 The trailing three-month mean beat the damped Holt candidate on paired validation series (**5.11 vs 5.99 units mean MAE**), so the baseline was selected for all 120 series. Holdout MAE was **7.09**, RMSE **10.17**, and WAPE **61.05%**. Forecast accuracy remains limited; the model-selection result does not imply reliable production forecasts.
 
-The historical planning build evaluated **120** inventory positions: **5 Critical, 28 High, 50 Medium, and 37 Low**. It produced **78** positive reorder suggestions totaling **2,877 units** and **2** transfer allocations totaling **7 units**. These are modeled decision-support outputs, not observed lost sales or executable orders. The report has **four pages**. [Forecasting](docs/forecasting.md) and [inventory intelligence](docs/inventory_intelligence.md) document the methods and full reconciliations.
+The persisted historical planning scenario evaluated **120** inventory positions: **5 Critical, 28 High, 50 Medium, and 37 Low**. It produced **78** positive reorder suggestions totaling **2,877 units** and **2** transfer allocations totaling **7 units**. Potential revenue exposure was **167,157.51** in source currency. These are modeled decision-support outputs, not observed lost sales or executable orders. The report has **four pages**. [Forecasting](docs/forecasting.md) and [inventory intelligence](docs/inventory_intelligence.md) document the methods and full reconciliations.
 
 ## Power BI report
 
-The four-page [Power BI project](powerbi/SupplySight.pbip) covers Executive Overview, Inventory & Replenishment, Supplier & Logistics, and Forecasting & Demand. It imports curated DEV outputs and checks that the historical forecast and planning runs are compatible before refresh. See the [report gallery](docs/power_bi.md#report-gallery) for all four pages.
+The four-page [Power BI project](powerbi/SupplySight.pbip) covers Executive Overview, Inventory & Replenishment, Supplier & Logistics, and Forecasting & Demand. It imports curated DEV outputs and checks that the historical forecast and planning runs are compatible before refresh. Power BI Desktop refreshed successfully against the corrected DEV build; the screenshots below show that historical result. See the [report gallery](docs/power_bi.md#report-gallery) for all four pages.
 
 **Executive Overview**
 

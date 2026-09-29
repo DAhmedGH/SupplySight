@@ -4,10 +4,13 @@ from dataclasses import replace
 from datetime import date
 from pathlib import Path
 
+import pytest
+
 from supplysight.data_generation.config import GenerationConfig, config_for_profile
 from supplysight.data_generation.generate import (
     _category_weights,
     _date_weights,
+    _make_fulfillment,
     generate_dataset,
 )
 from supplysight.data_generation.validation import validate_dataset
@@ -43,6 +46,95 @@ def test_generation_is_byte_reproducible(tmp_path: Path) -> None:
     generate_dataset(_config(second, lines=200), clean=True)
     for filename in sorted(p.name for p in first.iterdir()):
         assert (first / filename).read_bytes() == (second / filename).read_bytes()
+
+
+@pytest.mark.parametrize(
+    ("order_day", "shipped", "expected_order", "expected_delivery", "returns"),
+    [
+        ("2024-12-28", 2, "delivered", "2024-12-29", 1),
+        ("2024-12-30", 2, "delivered", "2024-12-31", 0),
+        ("2024-12-31", 2, "processing", "", 0),
+        ("2024-12-31", 1, "partially_fulfilled", "", 0),
+    ],
+)
+def test_fulfillment_is_observed_as_of_inclusive_cutoff(
+    tmp_path: Path, order_day, shipped, expected_order, expected_delivery, returns
+):
+    class FixedRandom:
+        def random(self):
+            return 0.0
+
+        def randint(self, lower, _upper):
+            return lower
+
+        def choice(self, values):
+            return values[0]
+
+    config = replace(_config(tmp_path), end_date=date(2024, 12, 31))
+    order = {
+        "order_line_id": "L1",
+        "order_date": order_day,
+        "quantity": 2,
+        "unit_price": 10.0,
+        "discount_pct": 0.0,
+        "status": "delivered",
+        "promised_delivery_date": "2025-01-04",
+    }
+    shipments, return_rows = _make_fulfillment(
+        config,
+        [(order, {}, {"warehouse_id": "W1"})],
+        {"L1": shipped},
+        FixedRandom(),
+        FixedRandom(),
+    )
+    assert order["status"] == expected_order
+    assert order["promised_delivery_date"] == "2025-01-04"
+    assert len(shipments) == 1
+    assert shipments[0]["ship_date"] == order_day
+    assert shipments[0]["shipped_quantity"] == shipped
+    assert shipments[0]["delivery_date"] == expected_delivery
+    assert shipments[0]["shipment_status"] == (
+        "delivered" if expected_delivery else "in_transit"
+    )
+    assert len(return_rows) == returns
+    if return_rows:
+        assert return_rows[0]["return_date"] == "2024-12-31"
+
+
+def test_default_generation_has_no_post_cutoff_realized_events(tmp_path: Path):
+    config = replace(_config(tmp_path, lines=1_000), end_date=date(2024, 12, 31))
+    generate_dataset(config, clean=True)
+    cutoff = config.end_date.isoformat()
+    assert all(
+        not row["delivery_date"] or row["delivery_date"] <= cutoff
+        for row in _read(tmp_path, "shipments.csv")
+    )
+    assert all(row["return_date"] <= cutoff for row in _read(tmp_path, "returns.csv"))
+
+
+def test_dataset_validation_rejects_realized_events_after_cutoff(tmp_path: Path):
+    config = _config(tmp_path, lines=1_000)
+    generate_dataset(config, clean=True)
+    shipments = _read(tmp_path, "shipments.csv")
+    delivered = next(row for row in shipments if row["shipment_status"] == "delivered")
+    delivered["delivery_date"] = "2024-04-01"
+    with (tmp_path / "shipments.csv").open("w", newline="", encoding="utf-8") as stream:
+        writer = csv.DictWriter(stream, fieldnames=list(shipments[0]))
+        writer.writeheader()
+        writer.writerows(shipments)
+    returns = _read(tmp_path, "returns.csv")
+    assert returns
+    returns[0]["return_date"] = "2024-04-01"
+    with (tmp_path / "returns.csv").open("w", newline="", encoding="utf-8") as stream:
+        writer = csv.DictWriter(stream, fieldnames=list(returns[0]))
+        writer.writeheader()
+        writer.writerows(returns)
+    result = validate_dataset(tmp_path, as_of_date=config.end_date)
+    assert any("delivery after as-of date" in issue for issue in result["errors"])
+    assert any(
+        "return " in issue and "after as-of date" in issue
+        for issue in result["errors"]
+    )
 
 
 def test_relationships_chronology_and_inventory_are_valid(tmp_path: Path) -> None:

@@ -48,7 +48,9 @@ These checks do not prove a live Snowflake build or Power BI refresh. The [CI ru
 
 ## Full DEV environment and historical build
 
-This path requires an existing Snowflake account, `SUPPLY_CHAIN_DEV`, `SUPPLY_CHAIN_DEV_WH`, the project schemas (`RAW`, `STAGING`, `INTERMEDIATE`, `CORE`, `MARTS`, `FORECASTING`, and `MONITORING` where configured), a DEV user/role with the required object permissions, and RSA private-key authentication. The repository does not provision the account or grant roles. Use no production target. Power BI Desktop is required to open and validate the report. Docker Desktop and WSL 2 are required only to run local Airflow on Windows.
+This path requires an existing Snowflake account, `SUPPLY_CHAIN_DEV`, `SUPPLY_CHAIN_DEV_WH`, the project schemas (`RAW`, `STAGING`, `INTERMEDIATE`, `CORE`, `MARTS`, `FORECASTING`, and `MONITORING` where configured), the `SUPPLYSIGHT_DEV_SERVICE` role with the required object permissions, and RSA private-key authentication. The repository does not provision the account or grant roles. Use no production target. Power BI Desktop is required to open and validate the report. Docker Desktop and WSL 2 are required only to run local Airflow on Windows.
+
+Power BI uses the separate `POWERBI_READER` role. It needs `USAGE` on `SUPPLY_CHAIN_DEV_WH`, `SUPPLY_CHAIN_DEV`, and the `CORE`, `MARTS`, and `FORECASTING` schemas, plus `SELECT ON ALL TABLES` and `SELECT ON ALL VIEWS` for existing relations and `SELECT ON FUTURE TABLES` and `SELECT ON FUTURE VIEWS` in each of those schemas. Future SELECT grants keep dbt-created or recreated relations readable after a rebuild; existing-object grants cover relations already present. This setup grants the read role no RAW or STAGING access. See the [Power BI access matrix](power_bi.md#purpose-and-connection). The corrected DEV Desktop refresh succeeded with these grants.
 
 Copy `.env.example` to ignored `.env` and set the DEV account, user, role, key path, and optional passphrase. Replace the placeholder dbt profile with the committed example; dbt reads `SNOWFLAKE_*` from the shell environment rather than loading `.env` itself. If running Airflow, copy `airflow/.env.example` to ignored `airflow/.env`, supply local Airflow secrets and the DEV key's host path, and use [the orchestration runbook](orchestration.md) for service startup. Keep keys and local profiles out of Git.
 
@@ -68,10 +70,10 @@ With real `SNOWFLAKE_*` values exported to the shell and `dbt/profiles.yml` in p
 .\.venv\Scripts\dbt.exe parse --project-dir dbt --profiles-dir dbt
 .\.venv\Scripts\dbt.exe compile --project-dir dbt --profiles-dir dbt
 .\.venv\Scripts\dbt.exe run --project-dir dbt --profiles-dir dbt --select tag:staging
-.\.venv\Scripts\dbt.exe test --project-dir dbt --profiles-dir dbt --select tag:staging
+.\.venv\Scripts\dbt.exe test --project-dir dbt --profiles-dir dbt --select tag:staging --indirect-selection cautious
 .\.venv\Scripts\dbt.exe snapshot --project-dir dbt --profiles-dir dbt --select snap_products
 .\.venv\Scripts\dbt.exe run --project-dir dbt --profiles-dir dbt --select tag:intermediate tag:core
-.\.venv\Scripts\dbt.exe test --project-dir dbt --profiles-dir dbt --select tag:intermediate tag:core
+.\.venv\Scripts\dbt.exe test --project-dir dbt --profiles-dir dbt --select tag:intermediate tag:core --indirect-selection cautious
 .\.venv\Scripts\dbt.exe run --project-dir dbt --profiles-dir dbt --select tag:marts
 .\.venv\Scripts\dbt.exe test --project-dir dbt --profiles-dir dbt --select tag:marts
 ```
@@ -87,4 +89,4 @@ Follow [RAW ingestion](raw_ingestion.md), [staging](staging.md), [dimensional wa
 
 The persisted forecast command and inventory `dbt run` **write DEV data and require approval**. Verify the forecast run ID, 120 series × three forecast months, and planning run compatibility using [forecasting](forecasting.md) and [inventory intelligence](inventory_intelligence.md). Current code intentionally rejects stale 2024 data in the Airflow forecast task; the manual historical path above is not a live 2026 forecast. Do not advertise a manual Airflow trigger as a one-click rebuild of this fixed scenario.
 
-Finally open `powerbi/SupplySight.pbip` in Power BI Desktop, set its `SnowflakeServer` parameter for the authorized DEV account, use the curated read-only `POWERBI_READER` access, and refresh. Power Query rejects incompatible forecast and planning lineage. Compare report totals with the [Power BI reconciliation targets](power_bi.md#reconciliation-and-limitations). Power BI credentials stay in the local credential store, not the repository.
+Finally open `powerbi/SupplySight.pbip` in Power BI Desktop, set its `SnowflakeServer` parameter for the authorized DEV account, use the curated read-only `POWERBI_READER` access, and refresh. Power Query rejects incompatible forecast and planning lineage. The corrected historical DEV model has refreshed successfully in Desktop; compare a reproduced import with the [persisted DEV reconciliation](power_bi.md#reconciliation-and-limitations). Power BI credentials stay in the local credential store, not the repository.

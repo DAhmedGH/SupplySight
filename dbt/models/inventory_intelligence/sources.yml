@@ -2,7 +2,7 @@ version: 2
 
 sources:
   - name: forecasting
-    description: Phase 9 forecast persistence in the existing DEV forecasting schema.
+    description: Forecast persistence in the existing DEV forecasting schema.
     database: SUPPLY_CHAIN_DEV
     schema: FORECASTING
     tables:

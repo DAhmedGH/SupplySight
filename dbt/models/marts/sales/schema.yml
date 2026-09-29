@@ -20,7 +20,7 @@ models:
       - {name: order_status, description: CORE normalized order status., tests: [{accepted_values: {arguments: {values: [delivered, processing, backordered, partially_fulfilled, cancelled]}}}]}
       - {name: booked_order_amount, description: Additive CORE net order amount across every eligible order status., tests: [not_null]}
       - {name: is_revenue_recognized, description: True only for delivered order lines., tests: [not_null]}
-      - {name: revenue_amount, description: Additive recognized revenue; CORE net_order_amount only for delivered status, otherwise zero., tests: [not_null]}
+      - {name: revenue_amount, description: 'Additive recognized revenue; CORE net_order_amount only for delivered status, otherwise zero.', tests: [not_null]}
       - {name: cost_of_goods_sold, description: Additive recognized COGS; quantity times selected product version unit_cost for delivered status only., tests: [not_null]}
       - {name: gross_profit_amount, description: Recognized revenue less recognized COGS; zero for non-delivered status., tests: [not_null]}
       - {name: gross_margin_rate, description: Delivered-line gross profit divided by delivered-line revenue; null for non-delivered or zero revenue. Recalculate from sums when aggregating.}
@@ -43,7 +43,7 @@ models:
       - {name: revenue_amount, description: Additive recognized revenue for delivered order lines only.}
       - {name: booked_order_amount, description: Additive net order value across all eligible statuses.}
       - {name: delivered_quantity, description: Additive realized units from delivered order lines only.}
-      - {name: delivered_order_line_count, description: Count of delivered lines, the revenue recognition cohort.}
+      - {name: delivered_order_line_count, description: 'Count of delivered lines, the revenue recognition cohort.'}
       - {name: processing_order_line_count, description: Count of processing lines.}
       - {name: backordered_order_line_count, description: Count of backordered lines.}
       - {name: partially_fulfilled_order_line_count, description: Count of partially fulfilled lines.}
@@ -68,7 +68,7 @@ models:
       - {name: warehouse_key, description: CORE warehouse key., tests: [not_null, {relationships: {arguments: {to: ref('dim_warehouse'), field: warehouse_key}}}]}
       - {name: return_count, description: Count of eligible CORE return facts., tests: [not_null]}
       - {name: returned_quantity, description: Additive returned units., tests: [not_null]}
-      - {name: refund_amount, description: Additive CORE refund amount, independent of sales order eligibility., tests: [not_null]}
+      - {name: refund_amount, description: 'Additive CORE refund amount, independent of sales order eligibility.', tests: [not_null]}
       - {name: warning_return_count, description: Eligible returns with source quality WARNING.}
       - {name: upstream_warning_order_count, description: Returns with WARNING order context.}
       - {name: upstream_quarantined_order_count, description: Returns retained with QUARANTINED order context.}

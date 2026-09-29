@@ -144,10 +144,26 @@ def validate_dataset(
             errors.append(
                 f"shipment {shipment['shipment_id']}: delivery before ship date"
             )
+        if as_of_date and date.fromisoformat(shipment["ship_date"]) > as_of_date:
+            errors.append(f"shipment {shipment['shipment_id']}: ships after as-of date")
+        if (
+            as_of_date
+            and shipment["delivery_date"]
+            and date.fromisoformat(shipment["delivery_date"]) > as_of_date
+        ):
+            errors.append(
+                f"shipment {shipment['shipment_id']}: delivery after as-of date"
+            )
+        if shipment["shipment_status"] == "in_transit" and shipment["delivery_date"]:
+            errors.append(
+                f"shipment {shipment['shipment_id']}: in-transit delivery is realized"
+            )
         if shipped_qty < 1:
             errors.append(f"shipment {shipment['shipment_id']}: nonpositive quantity")
 
     for line_id, order in orders.items():
+        if as_of_date and date.fromisoformat(order["order_date"]) > as_of_date:
+            errors.append(f"order line {line_id}: ordered after as-of date")
         quantity = int(order["quantity"])
         shipped = shipped_by_line[line_id]
         status = order["status"]
@@ -192,6 +208,8 @@ def validate_dataset(
         order = orders.get(line_id)
         shipment = shipments_by_line.get(line_id)
         quantity = int(ret["quantity"])
+        if as_of_date and date.fromisoformat(ret["return_date"]) > as_of_date:
+            errors.append(f"return {ret['return_id']}: after as-of date")
         if (
             shipment
             and shipment["delivery_date"]
@@ -210,6 +228,8 @@ def validate_dataset(
     for po in rows.get("purchase_orders", []):
         expected = date.fromisoformat(po["expected_delivery_date"])
         ordered = date.fromisoformat(po["order_date"])
+        if as_of_date and ordered > as_of_date:
+            errors.append(f"purchase order {po['purchase_order_id']}: after as-of date")
         received = (
             date.fromisoformat(po["received_date"]) if po["received_date"] else None
         )

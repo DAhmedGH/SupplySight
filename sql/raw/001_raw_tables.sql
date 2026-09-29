@@ -1,4 +1,4 @@
--- SupplySight Phase 3 RAW source tables and ingestion audit tables.
+-- SupplySight RAW source tables and ingestion audit tables.
 -- Source values are stored as VARCHAR to preserve the original CSV representation.
 -- Primary keys document business grain. Snowflake does not enforce standard-table keys.
 

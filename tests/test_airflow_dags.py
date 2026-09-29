@@ -336,6 +336,12 @@ def test_warehouse_build_runs_in_order_and_stops_on_failure(
     assert events[0] == "handoff"
     assert events[-1][1] == "test"
     assert "tag:core" in events[-1]
+    assert events[-1][-2:] == ("--indirect-selection", "cautious")
+    staging_test = next(
+        event for event in events if isinstance(event, tuple)
+        and event[1] == "test" and "tag:staging" in event
+    )
+    assert staging_test[-2:] == ("--indirect-selection", "cautious")
     assert "record" not in events
     assert [event[1] for event in events[1:] if isinstance(event, tuple)] == [
         "parse", "compile", "run", "test", "snapshot", "run", "test"

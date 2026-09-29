@@ -48,8 +48,8 @@ jobs:
             fi
           done
           case "$SNOWFLAKE_ROLE" in
-            SUPPLYSIGHT_DEV_SERVICE|SUPPLY_SIGHT_DEV_SERVICE) ;;
-            *) echo 'SNOWFLAKE_ROLE must be an approved DEV-only role.' >&2; exit 1 ;;
+            SUPPLYSIGHT_DEV_SERVICE) ;;
+            *) echo 'SNOWFLAKE_ROLE must be SUPPLYSIGHT_DEV_SERVICE.' >&2; exit 1 ;;
           esac
 
       - name: Configure DEV-only dbt profile

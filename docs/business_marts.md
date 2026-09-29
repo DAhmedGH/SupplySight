@@ -49,6 +49,26 @@ Rates are calculated from summed numerators and denominators, never by averaging
 
 The supplier as-of cutoff is the maximum CORE purchase-order order date, rather than the date a mart is rebuilt. This keeps historical DEV results reproducible. The supplier monthly row deliberately contains two date cohorts: spend and PO activity use order month, while OTIF, fill, and late counts use expected-delivery month. Null expected dates are outside the service cohort. Executive months use each domain's documented calendar basis, and exception counts use ingestion month.
 
+## Persisted DEV historical reconciliation
+
+The corrected DEV build uses synthetic events observed through **2024-12-31**. These measures have different documented cohorts and should not be added across domains:
+
+| Measure | Persisted DEV result |
+| --- | ---: |
+| 2024 recognized revenue | 2,017,378.4280 |
+| 2024 delivered COGS | 1,094,518.74 |
+| 2024 gross profit / margin | 922,859.6880 / 45.745492% |
+| 2024 eligible returns / returned units / refunds | 277 / 467 / 92,016.85 |
+| 2024 logistics-eligible shipments / shipped units | 4,740 / 11,312 |
+| Completed shipments | 4,343 |
+| Timeliness-eligible shipments / on time / late | 4,299 / 3,305 / 994 |
+| On-time rate / mean transit days | 76.878344% / 3.965231 |
+| December month-end inventory value | 540,863.35 |
+| December trailing-90-day delivered demand / COGS | 3,304 / 343,870.58 |
+| December trailing-90-day turnover / days of supply | 0.639033287 / 149.447762079 |
+
+Revenue and COGS use the delivered sales cohort; returns and refunds remain separate. The shipment count includes eligible shipped events, while timeliness requires both delivery and promise dates. Turnover and days of supply use the December trailing window rather than the full-year totals.
+
 ## Quality and product history
 
 CORE already excludes fact rows with known invalid measures or event attributes. `WARNING` rows remain eligible in all measures; marts retain their status and count them separately. `QUARANTINED` and otherwise ineligible records enter `mart_quality_exceptions` with source entity/key and reason, and do not contribute to business measure numerators or denominators. The exception register reconciles to the existing INTERMEDIATE view. An eligible shipment or return linked to a quarantined order remains included, while its `upstream_order_quality_status` is exposed and counted. Shipment timeliness is unavailable when an eligible order's promised date cannot be resolved; such shipments remain in shipment counts and leave the timeliness denominator.
@@ -57,6 +77,6 @@ The product dimension is warehouse-observed SCD Type 2. `product_history_fallbac
 
 ## Validation and downstream ownership
 
-dbt owns cohort eligibility, stable event flags, monetary formulas, additive components, and published ratios. Power BI can later calculate slicer-sensitive presentation measures, period comparisons, running totals, and display formatting from these components; it should not redefine eligibility. Monthly revenue, units, inventory, and supplier series are analytics-ready inputs for later forecasting, but no forecast or recommendation is produced in this phase.
+dbt owns cohort eligibility, stable event flags, monetary formulas, additive components, and published ratios. Power BI calculates slicer-sensitive presentation measures and display formatting from these components; it does not redefine eligibility. Forecasting consumes the eligible sales-order-line mart, and inventory intelligence consumes the relevant curated detail marts and persisted forecast.
 
 Run parse and compile with the DEV profile before the approved mart build, then run `dbt test --select tag:marts` and direct reconciliation queries. Schema tests cover required keys, uniqueness, relationships, and quality/status values. Singular tests compare detail and monthly business measures to CORE, bound service and inventory ratios, and check executive rollups, exception counts, and fallback coverage. Inspect DEV object names before and after the build to confirm that only `SUPPLY_CHAIN_DEV.MARTS` changed.
