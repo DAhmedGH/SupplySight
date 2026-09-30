@@ -341,11 +341,36 @@ def test_warehouse_build_runs_in_order_and_stops_on_failure(
         event for event in events if isinstance(event, tuple)
         and event[1] == "test" and "tag:staging" in event
     )
-    assert staging_test[-2:] == ("--indirect-selection", "cautious")
+    assert staging_test[-2:] == ("--indirect-selection", "buildable")
     assert "record" not in events
     assert [event[1] for event in events[1:] if isinstance(event, tuple)] == [
         "parse", "compile", "run", "test", "snapshot", "run", "test"
     ]
+
+
+def test_warehouse_build_uses_buildable_marts_tests(
+    dags: dict[str, object], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    run = dags["_run_warehouse"]
+    commands = []
+    monkeypatch.setitem(run.__globals__, "_validate_handoff", lambda **_: {})
+    monkeypatch.setitem(run.__globals__, "_record_dbt_result", lambda: {})
+
+    def capture_command(command, **_):
+        commands.append(command)
+
+    monkeypatch.setattr(
+        run.__globals__["subprocess"], "run", capture_command
+    )
+
+    run(dag_run=SimpleNamespace(conf={}))
+
+    marts_test = next(
+        command
+        for command in commands
+        if command[1] == "test" and "tag:marts" in command
+    )
+    assert marts_test[-2:] == ["--indirect-selection", "buildable"]
 
 
 def test_branch_and_handoff_path_are_strict(dags: dict[str, object]) -> None:

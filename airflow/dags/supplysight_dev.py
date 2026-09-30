@@ -119,7 +119,7 @@ def _run_warehouse(**context: object) -> dict[str, object]:
         ("staging run", ("run", "--select", "tag:staging"), 1800),
         (
             "staging test",
-            ("test", "--select", "tag:staging", "--indirect-selection", "cautious"),
+            ("test", "--select", "tag:staging", "--indirect-selection", "buildable"),
             1800,
         ),
         ("product snapshot", ("snapshot", "--select", "snap_products"), 1800),
@@ -137,7 +137,11 @@ def _run_warehouse(**context: object) -> dict[str, object]:
             2700,
         ),
         ("marts run", ("run", "--select", "tag:marts"), 3600),
-        ("marts test", ("test", "--select", "tag:marts"), 2700),
+        (
+            "marts test",
+            ("test", "--select", "tag:marts", "--indirect-selection", "buildable"),
+            2700,
+        ),
         (
             "quality reconciliations",
             (

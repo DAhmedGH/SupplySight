@@ -70,12 +70,12 @@ With real `SNOWFLAKE_*` values exported to the shell and `dbt/profiles.yml` in p
 .\.venv\Scripts\dbt.exe parse --project-dir dbt --profiles-dir dbt
 .\.venv\Scripts\dbt.exe compile --project-dir dbt --profiles-dir dbt
 .\.venv\Scripts\dbt.exe run --project-dir dbt --profiles-dir dbt --select tag:staging
-.\.venv\Scripts\dbt.exe test --project-dir dbt --profiles-dir dbt --select tag:staging --indirect-selection cautious
+.\.venv\Scripts\dbt.exe test --project-dir dbt --profiles-dir dbt --select tag:staging --indirect-selection buildable
 .\.venv\Scripts\dbt.exe snapshot --project-dir dbt --profiles-dir dbt --select snap_products
 .\.venv\Scripts\dbt.exe run --project-dir dbt --profiles-dir dbt --select tag:intermediate tag:core
 .\.venv\Scripts\dbt.exe test --project-dir dbt --profiles-dir dbt --select tag:intermediate tag:core --indirect-selection cautious
 .\.venv\Scripts\dbt.exe run --project-dir dbt --profiles-dir dbt --select tag:marts
-.\.venv\Scripts\dbt.exe test --project-dir dbt --profiles-dir dbt --select tag:marts
+.\.venv\Scripts\dbt.exe test --project-dir dbt --profiles-dir dbt --select tag:marts --indirect-selection buildable
 ```
 
 Follow [RAW ingestion](raw_ingestion.md), [staging](staging.md), [dimensional warehouse](dimensional_warehouse.md), and [business marts](business_marts.md) for reconciliation checks. The forecast schema script `sql/forecasting/001_forecasting_tables.sql` creates DEV FORECASTING objects and must be executed only with approval. The forecast CLI reads MARTS in `--dry-run` mode; omitting that flag **writes DEV forecast tables**. The historical persisted run then supplies the fixed planning models:

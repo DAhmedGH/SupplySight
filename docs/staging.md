@@ -25,7 +25,7 @@ After exporting the required `SNOWFLAKE_*` connection values into the shell and 
 .\.venv\Scripts\dbt.exe compile --project-dir dbt --profiles-dir dbt --select tag:staging
 .\.venv\Scripts\dbt.exe source freshness --project-dir dbt --profiles-dir dbt
 .\.venv\Scripts\dbt.exe run --project-dir dbt --profiles-dir dbt --select tag:staging
-.\.venv\Scripts\dbt.exe test --project-dir dbt --profiles-dir dbt --select tag:staging --indirect-selection cautious
+.\.venv\Scripts\dbt.exe test --project-dir dbt --profiles-dir dbt --select tag:staging --indirect-selection buildable
 ```
 
 The source and model YAML under `dbt/models/staging/` describe grains, keys, conversions, quality fields, and column-level tests. Reconcile staged counts, keys, and quality classifications with RAW after each load. Freshness results should be interpreted against the manual DEV refresh schedule; an alert calls for checking source-row load times and the ingestion audits.
